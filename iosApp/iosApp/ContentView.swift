@@ -5,24 +5,24 @@ struct ContentView: View {
     @State private var showContent = false
     var body: some View {
         VStack {
-            Button("Click me!") {
-                withAnimation {
-                    showContent = !showContent
-                }
+            VStack(spacing: 16) {
+                Image(systemName: "swift")
+                    .font(.system(size: 80))
+                    .foregroundColor(.accentColor)
+                Text("Kvs Storage")
             }
-
-            if showContent {
-                VStack(spacing: 16) {
-                    Image(systemName: "swift")
-                        .font(.system(size: 200))
-                        .foregroundColor(.accentColor)
-                    Text("SwiftUI: \(Greeting().greet())")
-                }
-                .transition(.move(edge: .top).combined(with: .opacity))
+            Button("Click me!") {
+             
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .padding()
+    }
+    
+    func hello() async  {
+        let kvs = Storage.shared.kvs(name: "")
+        try! await kvs.edit().putBoolean(key: "", value: true).commit()
+        
     }
 }
 

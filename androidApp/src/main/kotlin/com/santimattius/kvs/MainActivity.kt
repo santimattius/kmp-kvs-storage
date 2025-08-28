@@ -1,4 +1,4 @@
-package com.santimattius.kmp
+package com.santimattius.kvs
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

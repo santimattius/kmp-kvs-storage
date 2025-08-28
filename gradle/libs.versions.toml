@@ -1,6 +1,10 @@
 [versions]
 agp = "8.12.1"
-kotlin = "2.2.0"
+kotlin = "2.2.10"
+kotlinxAtomicfuVersion = "0.23.1"
+kotlinxCollectionsImmutable = "0.4.0"
+skie = "0.10.6"
+atomicfu = "0.29.0"
 
 android-compileSdk = "36"
 android-minSdk = "24"
@@ -12,6 +16,10 @@ androidx-lifecycle = "2.9.2"
 androidx-activity = "1.10.1"
 androidx-appcompat = "1.7.1"
 androidx-core = "1.17.0"
+
+startupRuntime = "1.2.0"
+datastore = "1.1.7"
+kotlinxCoroutines = "1.10.2"
 
 androidx-espresso = "3.7.0"
 androidx-testExt = "1.3.0"
@@ -39,6 +47,18 @@ androidx-lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 
+#Data Store
+androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+#Coroutines
+jetbrains-kotlinx-atomicfu = { module = "org.jetbrains.kotlinx:kotlinx-atomicfu", version.ref = "kotlinxAtomicfuVersion" }
+kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
+
+#App Startup (Android)
+androidx-startup-runtime = { module = "androidx.startup:startup-runtime", version.ref = "startupRuntime" }
+
 #Kotlin Testing
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
@@ -57,3 +77,5 @@ composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "k
 
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlinAtomicfu = { id = "org.jetbrains.kotlinx.atomicfu", version.ref = "atomicfu" }
+skie = { id = "co.touchlab.skie", version.ref = "skie" }

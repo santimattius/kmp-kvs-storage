@@ -1,4 +1,4 @@
-package com.santimattius.kmp
+package com.santimattius.kvs
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

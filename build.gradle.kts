@@ -6,4 +6,6 @@ plugins {
     alias(libs.plugins.androidKMPLibrary) apply false
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
+    alias(libs.plugins.kotlinAtomicfu) apply false
+    alias(libs.plugins.skie) apply false
 }
