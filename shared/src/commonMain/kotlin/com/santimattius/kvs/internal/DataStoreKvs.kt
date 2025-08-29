@@ -4,10 +4,15 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.santimattius.kvs.Kvs
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 
 internal class DataStoreKvs(
-    private val dataStore: DataStore<Preferences>
+    private val dataStore: DataStore<Preferences>,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : Kvs {
 
     override suspend fun getAll(): Map<String, Any> {
@@ -21,13 +26,13 @@ internal class DataStoreKvs(
         key: String,
         defaultValue: T,
         converter: (String) -> T?
-    ): T {
+    ): T = withContext(dispatcher){
         val preferencesKey = stringPreferencesKey(key)
         // Use data.first() to get the current snapshot of preferences.
         // Using .last() on DataStore's Flow would suspend indefinitely.
         val currentPreferences = dataStore.data.first()
         val stringValue = currentPreferences[preferencesKey]
-        return if (stringValue != null) {
+        if (stringValue != null) {
             converter(stringValue) ?: defaultValue
         } else {
             defaultValue
@@ -58,9 +63,9 @@ internal class DataStoreKvs(
         return DataStoreKvsEditor(dataStore)
     }
 
-    override suspend fun contains(key: String): Boolean {
+    override suspend fun contains(key: String): Boolean = withContext(dispatcher){
         val preferencesKey = stringPreferencesKey(key)
         val currentPreferences = dataStore.data.first()
-        return currentPreferences.contains(preferencesKey)
+        currentPreferences.contains(preferencesKey)
     }
 }

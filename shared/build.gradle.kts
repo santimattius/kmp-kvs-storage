@@ -4,7 +4,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidKMPLibrary)
-    alias(libs.plugins.kotlinAtomicfu)
     alias(libs.plugins.skie)
 }
 
@@ -37,13 +36,13 @@ kotlin {
         }
 
         commonMain.dependencies {
+            implementation(libs.kotlin.stdlib)
             implementation(libs.kotlinx.coroutines.core)
             // DataStore library
             implementation(libs.androidx.datastore)
             // The Preferences DataStore library
             implementation(libs.androidx.datastore.preferences)
 
-//            implementation(libs.jetbrains.kotlinx.atomicfu)
             implementation(libs.kotlinx.collections.immutable)
         }
 

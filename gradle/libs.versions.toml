@@ -1,17 +1,16 @@
 [versions]
-agp = "8.12.1"
+agp = "8.12.2"
 kotlin = "2.2.10"
-kotlinxAtomicfuVersion = "0.23.1"
+kotlinStdlib = "2.2.10"
 kotlinxCollectionsImmutable = "0.4.0"
 skie = "0.10.6"
-atomicfu = "0.29.0"
 
 android-compileSdk = "36"
 android-minSdk = "24"
 android-targetSdk = "36"
 
-composeBom = "2025.08.00"
-androidx-lifecycle = "2.9.2"
+composeBom = "2025.08.01"
+androidx-lifecycle = "2.9.3"
 
 androidx-activity = "1.10.1"
 androidx-appcompat = "1.7.1"
@@ -51,7 +50,7 @@ androidx-lifecycle-lifecycle-runtime-compose = { group = "androidx.lifecycle", n
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 #Coroutines
-jetbrains-kotlinx-atomicfu = { module = "org.jetbrains.kotlinx:kotlinx-atomicfu", version.ref = "kotlinxAtomicfuVersion" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlinStdlib" }
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
@@ -77,5 +76,4 @@ composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "k
 
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-kotlinAtomicfu = { id = "org.jetbrains.kotlinx.atomicfu", version.ref = "atomicfu" }
 skie = { id = "co.touchlab.skie", version.ref = "skie" }

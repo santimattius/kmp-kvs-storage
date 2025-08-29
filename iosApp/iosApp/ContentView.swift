@@ -2,7 +2,10 @@ import SwiftUI
 import Shared
 
 struct ContentView: View {
-    @State private var showContent = false
+    private let kvs = Storage.shared.kvs(name: "user_preferences")
+    
+    @State private var isDarkModeEnabled = false
+    
     var body: some View {
         VStack {
             VStack(spacing: 16) {
@@ -11,17 +14,29 @@ struct ContentView: View {
                     .foregroundColor(.accentColor)
                 Text("Kvs Storage")
             }
-            Button("Click me!") {
-             
+            Toggle(isOn: $isDarkModeEnabled) {
+                 Text("Is Dark Mode Enabled")
+            }.onChange(of: isDarkModeEnabled){
+                updateValue(value: isDarkModeEnabled)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .padding()
+        .background(isDarkModeEnabled ? Color.black: Color.white)
+        .environment(\.colorScheme, isDarkModeEnabled ? .dark : .light)
+        .task {
+            self.isDarkModeEnabled = try! await kvs.getBoolean(
+                key: "is_dark_mode_enabled", defValue: false
+            ).boolValue
+        }
     }
     
-    func hello() async  {
-        let kvs = Storage.shared.kvs(name: "")
-        try! await kvs.edit().putBoolean(key: "", value: true).commit()
+    func updateValue(value:Bool)  {
+        Task{
+            try! await kvs.edit()
+                .putBoolean(key: "is_dark_mode_enabled", value: value)
+                .commit()
+        }
         
     }
 }

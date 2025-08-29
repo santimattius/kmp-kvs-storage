@@ -5,8 +5,11 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.santimattius.kvs.Kvs
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlin.concurrent.Volatile
 
 internal class DataStoreKvsEditor(
@@ -93,18 +96,21 @@ internal class DataStoreKvsEditor(
             val currentClearOperation = this.clearOperation
 
             try {
-                dataStore.edit { preferences ->
-                    if (currentClearOperation) {
-                        preferences.clear()
-                        // After clearing, we still want to apply any pending additions from this session.
-                        // Removals for this session are implicitly handled by the clear.
-                    } else {
-                        currentRemoveValues.forEach { key ->
-                            preferences.remove(stringPreferencesKey(key))
+                //TODO: review this context change
+                withContext(Dispatchers.IO){
+                    dataStore.edit { preferences ->
+                        if (currentClearOperation) {
+                            preferences.clear()
+                            // After clearing, we still want to apply any pending additions from this session.
+                            // Removals for this session are implicitly handled by the clear.
+                        } else {
+                            currentRemoveValues.forEach { key ->
+                                preferences.remove(stringPreferencesKey(key))
+                            }
                         }
-                    }
-                    currentAddValues.forEach { (key, value) ->
-                        preferences[stringPreferencesKey(key)] = value
+                        currentAddValues.forEach { (key, value) ->
+                            preferences[stringPreferencesKey(key)] = value
+                        }
                     }
                 }
                 // If commit is successful, mark as committed and clear internal state for this instance
