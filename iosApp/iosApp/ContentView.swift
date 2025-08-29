@@ -1,5 +1,5 @@
 import SwiftUI
-import Shared
+import KvsStorage
 
 struct ContentView: View {
     private let kvs = Storage.shared.kvs(name: "user_preferences")
