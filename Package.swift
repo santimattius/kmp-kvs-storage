@@ -12,8 +12,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "KvsStorage",
-            url: "https://github.com/santimattius/kmp-kvs-storage/releases/download/1.0.0-ALPHA03/KvsStorage.xcframework.zip",
-            checksum:"c21bc919df2b7f9dd05a281915565b2c8e558dc8af33485ff8a004d4ce520fe4")
+            url: "https://github.com/santimattius/kmp-kvs-storage/releases/download/1.0.0-ALPHA01/KvsStorage.xcframework.zip",
+            checksum:"b71a0855b9929df491dbaf4f5533c22fee30ef826d948f687c432f71b4790a6b")
     ]
 )
 
