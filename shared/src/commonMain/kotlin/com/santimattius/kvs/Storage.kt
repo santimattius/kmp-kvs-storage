@@ -2,6 +2,7 @@ package com.santimattius.kvs
 
 import com.santimattius.kvs.internal.DataStoreKvs
 import com.santimattius.kvs.internal.provideDataStoreInstance
+import com.santimattius.kvs.internal.provideInMemoryKvsInstance
 
 /**
  * Entry point for accessing Key-Value Storage (KVS) instances.
@@ -23,3 +24,6 @@ object Storage {
      */
     fun kvs(name: String): Kvs = DataStoreKvs(provideDataStoreInstance(name))
 }
+
+
+fun Storage.inMemory(name: String): Kvs = provideInMemoryKvsInstance(name)

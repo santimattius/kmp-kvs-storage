@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 class MainViewModel : ViewModel() {
 
     private val kvs = Storage.kvs("user_preferences")
+    private val inMemoryKvs = Storage.inMemory("user_preferences")
 
     private val _isDarkModeEnabled = MutableStateFlow(false)
     val isDarkModeEnabled: StateFlow<Boolean> = _isDarkModeEnabled.onStart {

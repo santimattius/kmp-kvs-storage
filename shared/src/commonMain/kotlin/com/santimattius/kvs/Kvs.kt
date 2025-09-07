@@ -1,8 +1,5 @@
 package com.santimattius.kvs
 
-import com.santimattius.kvs.internal.DataStoreKvs
-import com.santimattius.kvs.internal.provideDataStoreInstance
-
 /**
  * Represents a Key-Value Storage system.
  * This interface provides methods to store, retrieve, and manage key-value pairs.
