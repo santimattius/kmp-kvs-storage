@@ -23,7 +23,18 @@ object Storage {
      * @return A [Kvs] instance associated with the given [name].
      */
     fun kvs(name: String): Kvs = DataStoreKvs(provideDataStoreInstance(name))
+
+    /**
+     * Creates or retrieves a named in-memory [Kvs] instance.
+     *
+     * This function provides an in-memory implementation of the [Kvs] interface.
+     * Data stored in this instance will not persist across application restarts.
+     * Each unique [name] will correspond to a distinct in-memory store.
+     * This is primarily useful for testing or scenarios where data persistence
+     * is not required.
+     *
+     * @param name The unique name for the in-memory KVS instance.
+     * @return An in-memory [Kvs] instance associated with the given [name].
+     */
+    fun inMemoryKvs(name: String): Kvs = provideInMemoryKvsInstance(name)
 }
-
-
-fun Storage.inMemory(name: String): Kvs = provideInMemoryKvsInstance(name)
