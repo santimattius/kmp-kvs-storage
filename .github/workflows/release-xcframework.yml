@@ -64,38 +64,8 @@ jobs:
         echo "checksum=$CHECKSUM" >> $GITHUB_OUTPUT
         echo "CHECKSUM=$CHECKSUM" >> $GITHUB_ENV
     
-    - name: Check if version is pre-release
-      id: check-prerelease
-      run: |
-        # Check if version contains a hyphen (e.g., 1.0.0-ALPHA03)
-        if [[ "${{ steps.version.outputs.version }}" == *-* ]]; then
-          echo "is_prerelease=true" >> $GITHUB_OUTPUT
-        else
-          echo "is_prerelease=false" >> $GITHUB_OUTPUT
-        fi
-    
-    - name: Create Release
-      id: create_release
-      uses: softprops/action-gh-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ env.TAG_VERSION }}
-        name: Release ${{ steps.version.outputs.version }}
-        generate_release_notes: true
-        draft: false
-        prerelease: ${{ steps.check-prerelease.outputs.is_prerelease }}
-        files: |
-          ./release/KvsStorage-${{ steps.version.outputs.version }}.xcframework.zip
-    
-        # Asset upload is now handled by softprops/action-gh-release
-    
     - name: Update Package.swift
       run: |
-        # Clone the package repository if it's different from the current one
-        # git clone https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/your-org/your-package-repo.git
-        # cd your-package-repo
-        
         # Create or update Package.swift
         cat > Package.swift << 'EOF'
         // swift-tools-version:5.3
@@ -115,22 +85,43 @@ jobs:
             targets: [
                 .binaryTarget(
                     name: "KvsStorage",
-                    url: "https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.version }}/KvsStorage-${{ steps.version.outputs.version }}.xcframework.zip",
+                    url: "https://github.com/${{ github.repository }}/releases/download/${{ env.TAG_VERSION }}/KvsStorage-${{ steps.version.outputs.version }}.xcframework.zip",
                     checksum: "${{ steps.checksum.outputs.checksum }}"
                 )
             ]
         )
         EOF
         
-        # Configure git
+        # Add and commit the changes
         git config --global user.name 'GitHub Action'
         git config --global user.email 'action@github.com'
-        
-        # Check if there are changes to commit
-        if ! git diff --exit-code Package.swift > /dev/null; then
-            git add Package.swift
-            git commit -m "Update to version ${{ steps.version.outputs.version }}"
-            git push
+        git add Package.swift
+        git commit -m "Update Package.swift for version ${{ steps.version.outputs.version }}" || echo "No changes to commit"
+    
+    - name: Check if version is pre-release
+      id: check-prerelease
+      run: |
+        # Check if version contains a hyphen (e.g., 1.0.0-ALPHA03)
+        if [[ "${{ steps.version.outputs.version }}" == *-* ]]; then
+          echo "is_prerelease=true" >> $GITHUB_OUTPUT
         else
-            echo "No changes to commit"
+          echo "is_prerelease=false" >> $GITHUB_OUTPUT
         fi
+    
+    - name: Push Package.swift changes
+      run: |
+        git push || echo "No changes to push"
+    
+    - name: Create Release
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ env.TAG_VERSION }}
+        name: Release ${{ steps.version.outputs.version }}
+        generate_release_notes: true
+        draft: false
+        prerelease: ${{ steps.check-prerelease.outputs.is_prerelease }}
+        files: |
+          ./release/KvsStorage-${{ steps.version.outputs.version }}.xcframework.zip
