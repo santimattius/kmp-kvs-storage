@@ -35,10 +35,11 @@ jobs:
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         # For tag version, only add 'v' prefix if it's a stable version (no pre-release)
         if [[ "$VERSION" == *-* ]]; then
-          echo "TAG_VERSION=refs/tags/$VERSION" >> $GITHUB_ENV
+          echo "TAG_VERSION=$VERSION" >> $GITHUB_ENV
         else
-          echo "TAG_VERSION=refs/tags/v$VERSION" >> $GITHUB_ENV
+          echo "TAG_VERSION=v$VERSION" >> $GITHUB_ENV
         fi
+        echo "Using tag: ${{ env.TAG_VERSION }}"
     
     - name: Build XCFramework
       run: |
@@ -79,8 +80,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag: ${{ env.TAG_VERSION }}
+        tag_name: ${{ env.TAG_VERSION }}
         name: Release ${{ steps.version.outputs.version }}
+        generate_release_notes: true
         draft: false
         prerelease: ${{ steps.check-prerelease.outputs.is_prerelease }}
         files: |
