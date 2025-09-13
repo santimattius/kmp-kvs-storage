@@ -1,5 +1,5 @@
 
-# [ALPHA] KvsStorage
+# KvsStorage
 
 ## Overview
 
