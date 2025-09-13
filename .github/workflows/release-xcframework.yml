@@ -38,7 +38,7 @@ jobs:
     
     - name: Build XCFramework
       run: |
-        ./gradlew :shared:assembleXCFramework
+        ./gradlew :shared:assembleKvsStorageXCFramework
         
         # Create a directory for the release
         mkdir -p release
