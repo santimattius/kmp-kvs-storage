@@ -108,9 +108,22 @@ jobs:
           echo "is_prerelease=false" >> $GITHUB_OUTPUT
         fi
     
-    - name: Push Package.swift changes
+    - name: Create and push tag with Package.swift changes
       run: |
-        git push || echo "No changes to push"
+        # Create an annotated tag that includes the Package.swift changes
+        git config --global user.name 'GitHub Action'
+        git config --global user.email 'action@github.com'
+        
+        # Create a new commit with the Package.swift changes
+        git add Package.swift
+        git commit -m "Update Package.swift for version ${{ steps.version.outputs.version }}" || echo "No changes to commit"
+        
+        # Create an annotated tag
+        git tag -a ${{ env.TAG_VERSION }} -m "Release ${{ steps.version.outputs.version }}"
+        
+        # Push the commit and tag
+        git push origin HEAD
+        git push origin ${{ env.TAG_VERSION }}
     
     - name: Create Release
       id: create_release
