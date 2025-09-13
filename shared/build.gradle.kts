@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "io.github.santimattius"
-version = "1.0.0-ALPHA09"
+version = "1.0.0"
 
 kotlin {
     androidLibrary {
@@ -94,7 +94,7 @@ mavenPublishing {
         }
         scm {
             url = "https://github.com/santimattius/kmp-kvs-storage/"
-            connection = "scm:git:git://github.com/kotlin-hands-on/fibonacci.git"
+            connection = "scm:git:git://github.com/santimattius/kmp-kvs-storage.git"
             developerConnection = "scm:git:ssh://git@github.com/santimattius/kmp-kvs-storage.git"
         }
     }
