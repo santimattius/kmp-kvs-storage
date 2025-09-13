@@ -1,5 +1,5 @@
 
-# [ALPHA] KvsStorage
+# KvsStorage
 
 ## Overview
 
@@ -14,9 +14,9 @@ The library offers:
 ## Setup
 
 ### Prerequisites
-- Kotlin 1.8.0 or higher
-- Gradle 7.0.0 or higher
-- Android Gradle Plugin 7.0.0 or higher (for Android projects)
+- Kotlin 2.2.10 or higher
+- Gradle 8.13.0 or higher
+- Android Gradle Plugin 8.12.2 or higher (for Android projects)
 
 ### Installation
 
@@ -89,6 +89,33 @@ kvs.edit()
 ```
 
 ### Advanced Usage
+
+#### In-Memory Storage for Testing
+
+For testing purposes, you can use `InMemoryKvs` which provides a volatile, in-memory implementation of the KVS interface. This is particularly useful for unit tests where you don't want to persist any data between test runs.
+
+```kotlin
+// In your test class (commonTest)
+private val testKvs = Storage.inMemoryKvs("test_preferences")
+
+@Test
+fun `test kvs operations`() = runTest {
+    // Store data
+    testKvs.edit()
+        .putString("test_key", "test_value")
+        .commit()
+    
+    // Retrieve data
+    val value = testKvs.getString("test_key", "default")
+    assertEquals("test_value", value)
+    
+    // Clear data between tests
+    testKvs.edit().clear().commit()
+}
+
+// On iOS (Swift)
+// private let testKvs = Storage.shared.inMemoryKvs(name: "test_preferences")
+```
 
 #### Checking for Key Existence
 ```kotlin
