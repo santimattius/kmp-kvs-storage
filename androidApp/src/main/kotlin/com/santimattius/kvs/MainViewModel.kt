@@ -17,9 +17,18 @@ class MainViewModel : ViewModel() {
     private val inMemoryKvs = Storage.inMemoryKvs("user_preferences")
 
     private val _isDarkModeEnabled = MutableStateFlow(false)
-    val isDarkModeEnabled: StateFlow<Boolean> = _isDarkModeEnabled.onStart {
+    /*val isDarkModeEnabled: StateFlow<Boolean> = _isDarkModeEnabled.onStart {
         read()
     }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(1000),
+        initialValue = false
+    )*/
+
+    val isDarkModeEnabled: StateFlow<Boolean> = kvs.getBooleanAsStream(
+        key = "dark_mode",
+        defValue = false
+    ).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(1000),
         initialValue = false
@@ -40,7 +49,7 @@ class MainViewModel : ViewModel() {
             kvs.edit()
                 .putBoolean("dark_mode", value)
                 .commit()
-            read()
+            //read()
         }
     }
 

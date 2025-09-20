@@ -25,9 +25,13 @@ struct ContentView: View {
         .background(isDarkModeEnabled ? Color.black: Color.white)
         .environment(\.colorScheme, isDarkModeEnabled ? .dark : .light)
         .task {
-            self.isDarkModeEnabled = try! await kvs.getBoolean(
+            for await isEnabled in kvs.getBooleanAsStream( key: "is_dark_mode_enabled", defValue: false) {
+                self.isDarkModeEnabled = isEnabled.boolValue
+            }
+            /*self.isDarkModeEnabled = try! await kvs.getBoolean(
                 key: "is_dark_mode_enabled", defValue: false
             ).boolValue
+             */
         }
     }
     
