@@ -1,6 +1,7 @@
 package com.santimattius.kvs.internal
 
 import com.santimattius.kvs.internal.InMemoryKvs
+import com.santimattius.kvs.internal.memory.InMemoryPreferences
 import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -28,7 +29,11 @@ internal fun provideInMemoryKvsInstance(name: String): InMemoryKvs {
         val persistentMap = inMemoryInstances.load()
         // Double-check locking pattern
         persistentMap[name]?.let { return it }
-        val newDataStore = InMemoryKvs()
+        val lock = SynchronizedObject()
+        val newDataStore = InMemoryKvs(
+            preferences = InMemoryPreferences(lock),
+            lock = lock
+        )
         inMemoryInstances.store(persistentMap.put(name, newDataStore))
         newDataStore
     }
