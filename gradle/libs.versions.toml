@@ -4,7 +4,7 @@ kotlin = "2.2.10"
 kotlinStdlib = "2.2.10"
 kotlinxCollectionsImmutable = "0.4.0"
 skie = "0.10.6"
-kmmbridge = "1.2.1"
+swiftklib = "0.6.3"
 mavenPublish = "0.30.0"
 
 android-compileSdk = "36"
@@ -79,5 +79,5 @@ composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "k
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 skie = { id = "co.touchlab.skie", version.ref = "skie" }
-kmmbridge = { id = "co.touchlab.kmmbridge", version.ref = "kmmbridge" }
+swiftklib = { id = "io.github.ttypic.swiftklib", version.ref = "swiftklib" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }

@@ -1,8 +1,8 @@
 package com.santimattius.kvs.internal
 
 import com.santimattius.kvs.Kvs
-import com.santimattius.kvs.internal.ds.KvsStandard
-import com.santimattius.kvs.internal.ds.KvsStream
+import com.santimattius.kvs.internal.datastore.KvsStandard
+import com.santimattius.kvs.internal.datastore.KvsStream
 import com.santimattius.kvs.internal.memory.InMemoryKvsStandard
 import com.santimattius.kvs.internal.memory.InMemoryKvsStream
 import com.santimattius.kvs.internal.memory.InMemoryPreferences

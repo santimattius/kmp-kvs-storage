@@ -1,14 +1,12 @@
-package com.santimattius.kvs.internal.ds
+package com.santimattius.kvs.internal.datastore
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.stringPreferencesKey
+import com.santimattius.kvs.internal.datastore.storage.Storage
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 
 /**
  * Provides Flow-based access to DataStore preferences.
@@ -17,40 +15,11 @@ import kotlinx.coroutines.flow.map
  * changes to various data types stored in a [DataStore] as a [Flow].
  * It ensures that data observation occurs on the specified [dispatcher].
  *
- * @property dataStore The [DataStore] instance used for data persistence.
- * @property dispatcher The [CoroutineDispatcher] used for Flow operations, defaults to [Dispatchers.IO].
+ * @property store The [DataStore] instance used for data persistence.
  */
-class DataStoreKvsStream(
-    private val dataStore: DataStore<Preferences>,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+internal class DataStoreKvsStream(
+    private val store: Storage<String>,
 ) : KvsStream {
-
-    /**
-     * Reads a preference value from the current [Preferences] snapshot.
-     *
-     * This is a private extension function for [Preferences] used by [readPreferenceFlow].
-     * It retrieves a string preference and then uses the provided [converter]
-     * to transform it into the desired type [T].
-     *
-     * @param T The target data type.
-     * @param key The preference key.
-     * @param defaultValue The value to return if the key is not found or conversion fails.
-     * @param converter A function to convert the String value to type [T].
-     * @return The converted preference value, or [defaultValue] if not found or conversion fails.
-     */
-    private fun <T> Preferences.readPreference(
-        key: String,
-        defaultValue: T,
-        converter: (String) -> T?
-    ): T {
-        val preferencesKey = stringPreferencesKey(key)
-        val stringValue = get(preferencesKey)
-        return if (stringValue != null) {
-            converter(stringValue) ?: defaultValue
-        } else {
-            defaultValue
-        }
-    }
 
     /**
      * Creates a [Flow] that emits updates to a preference value.
@@ -70,9 +39,11 @@ class DataStoreKvsStream(
         key: String,
         defaultValue: T,
         converter: (String) -> T?
-    ) = dataStore.data.map { preferences ->
-        preferences.readPreference(key, defaultValue, converter)
-    }.flowOn(dispatcher)
+    ) = store.readPreferenceAsStream(
+        key = key,
+        defaultValue = defaultValue,
+        converter = converter
+    )
 
     /**
      * Returns a [Flow] that emits a map of all key-value pairs upon any change.
@@ -81,9 +52,7 @@ class DataStoreKvsStream(
      *         and values are of type [Any], reflecting their original stored type.
      */
     override fun getAllAsStream(): Flow<Map<String, Any>> {
-        return dataStore.data.map { preferences ->
-            preferences.asMap().mapKeys { entry -> entry.key.name }
-        }.flowOn(dispatcher) // Ensure map operation runs on the specified dispatcher
+        return store.getAllAsStream()
     }
 
     /**
@@ -154,6 +123,5 @@ class DataStoreKvsStream(
         defValue: Boolean
     ): Flow<Boolean> {
         return readPreferenceFlow(key, defValue) { value -> value.toBooleanStrictOrNull() }
-
     }
 }

@@ -4,10 +4,13 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.santimattius.kvs.Kvs
-import com.santimattius.kvs.internal.ds.DataStoreKvsStandard
-import com.santimattius.kvs.internal.ds.DataStoreKvsStream
-import com.santimattius.kvs.internal.ds.KvsStandard
-import com.santimattius.kvs.internal.ds.KvsStream
+import com.santimattius.kvs.internal.datastore.DataStoreKvsEditor
+import com.santimattius.kvs.internal.datastore.DataStoreKvsStandard
+import com.santimattius.kvs.internal.datastore.DataStoreKvsStream
+import com.santimattius.kvs.internal.datastore.KvsStandard
+import com.santimattius.kvs.internal.datastore.KvsStream
+import com.santimattius.kvs.internal.datastore.storage.DsStorage
+import com.santimattius.kvs.internal.datastore.storage.Storage
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -24,15 +27,15 @@ import kotlinx.coroutines.withContext
  * @property dispatcher The [CoroutineDispatcher] used for background operations, defaults to [Dispatchers.IO].
  */
 internal class DataStoreKvs(
-    private val dataStore: DataStore<Preferences>,
+    private val dataStore: Storage<String>,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
-) : Kvs, KvsStandard by DataStoreKvsStandard(dataStore, dispatcher),
-    KvsStream by DataStoreKvsStream(dataStore, dispatcher) {
+) : Kvs, KvsStandard by DataStoreKvsStandard(dataStore),
+    KvsStream by DataStoreKvsStream(dataStore) {
 
     /**
      * Returns a [Kvs.KvsEditor] for editing preferences.
      *
-     * @return A [DataStoreKvsEditor] instance.
+     * @return A [com.santimattius.kvs.internal.datastore.DataStoreKvsEditor] instance.
      */
     override fun edit(): Kvs.KvsEditor {
         return DataStoreKvsEditor(dataStore)
@@ -45,8 +48,6 @@ internal class DataStoreKvs(
      * @return `true` if the key exists, `false` otherwise.
      */
     override suspend fun contains(key: String): Boolean = withContext(dispatcher) {
-        val preferencesKey = stringPreferencesKey(key)
-        val currentPreferences = dataStore.data.first()
-        currentPreferences.contains(preferencesKey)
+      dataStore.contains(key)
     }
 }

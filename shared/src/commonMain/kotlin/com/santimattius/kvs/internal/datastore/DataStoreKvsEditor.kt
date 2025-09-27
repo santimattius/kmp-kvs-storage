@@ -1,10 +1,7 @@
-package com.santimattius.kvs.internal
+package com.santimattius.kvs.internal.datastore
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
 import com.santimattius.kvs.Kvs
+import com.santimattius.kvs.internal.datastore.storage.Storage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.sync.Mutex
@@ -13,13 +10,14 @@ import kotlinx.coroutines.withContext
 import kotlin.concurrent.Volatile
 
 internal class DataStoreKvsEditor(
-    private val dataStore: DataStore<Preferences>
+    private val storage: Storage<String>
 ) : Kvs.KvsEditor {
 
     // Mutex to ensure atomic commit operation
     private val commitMutex = Mutex()
 
     private var clearOperation = false
+
     // Note: These collections are not inherently thread-safe if modification methods (putString, etc.)
     // are called concurrently on the same instance before commit() is invoked.
     private val addValues = mutableMapOf<String, String>()
@@ -27,6 +25,7 @@ internal class DataStoreKvsEditor(
 
     @Volatile
     private var committed = false
+
     @Volatile
     private var commitInProgress = false
 
@@ -97,19 +96,19 @@ internal class DataStoreKvsEditor(
 
             try {
                 //TODO: review this context change
-                withContext(Dispatchers.IO){
-                    dataStore.edit { preferences ->
+                withContext(Dispatchers.IO) {
+                    storage.edit {
                         if (currentClearOperation) {
-                            preferences.clear()
+                            clear()
                             // After clearing, we still want to apply any pending additions from this session.
                             // Removals for this session are implicitly handled by the clear.
                         } else {
                             currentRemoveValues.forEach { key ->
-                                preferences.remove(stringPreferencesKey(key))
+                                remove(key)
                             }
                         }
                         currentAddValues.forEach { (key, value) ->
-                            preferences[stringPreferencesKey(key)] = value
+                            put(key, value)
                         }
                     }
                 }

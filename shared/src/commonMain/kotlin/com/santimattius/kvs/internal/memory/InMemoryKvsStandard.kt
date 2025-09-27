@@ -1,6 +1,6 @@
 package com.santimattius.kvs.internal.memory
 
-import com.santimattius.kvs.internal.ds.KvsStandard
+import com.santimattius.kvs.internal.datastore.KvsStandard
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.internal.SynchronizedObject
 import kotlinx.coroutines.internal.synchronized

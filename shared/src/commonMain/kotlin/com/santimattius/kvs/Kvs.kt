@@ -1,7 +1,7 @@
 package com.santimattius.kvs
 
-import com.santimattius.kvs.internal.ds.KvsStandard
-import com.santimattius.kvs.internal.ds.KvsStream
+import com.santimattius.kvs.internal.datastore.KvsStandard
+import com.santimattius.kvs.internal.datastore.KvsStream
 
 /**
  * Represents a Key-Value Storage system.

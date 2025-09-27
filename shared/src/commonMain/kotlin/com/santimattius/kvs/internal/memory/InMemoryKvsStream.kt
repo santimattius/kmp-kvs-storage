@@ -1,6 +1,6 @@
 package com.santimattius.kvs.internal.memory
 
-import com.santimattius.kvs.internal.ds.KvsStream
+import com.santimattius.kvs.internal.datastore.KvsStream
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
