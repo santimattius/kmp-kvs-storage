@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidKMPLibrary)
     alias(libs.plugins.skie)
+    alias(libs.plugins.swiftklib)
     alias(libs.plugins.mavenPublish)
 }
 
@@ -33,6 +34,13 @@ kotlin {
         iosArm64(),
         iosSimulatorArm64(),
     ).forEach {
+        it.compilations {
+            val main by getting {
+                cinterops {
+                    create("KtCrypto")
+                }
+            }
+        }
         it.binaries.framework {
             baseName = xcFrameworkName
 
@@ -63,6 +71,20 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
+    }
+}
+
+swiftklib {
+    create("KtCrypto") {
+        path = file("native/KtCrypto")
+        packageName("com.santimattius.kvs.native")
+    }
+}
+
+skie {
+    isEnabled.set(true)
+    swiftBundling {
+        enabled = true
     }
 }
 

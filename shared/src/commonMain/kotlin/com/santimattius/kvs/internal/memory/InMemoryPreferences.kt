@@ -24,7 +24,6 @@ class InMemoryPreferences(
 ) {
     private val _data: AtomicReference<Map<String, Any>> = AtomicReference(emptyMap())
 
-    // TODO: This mutable state flow is not correctly updated when _data changes via 'put' or 'commitEditor'.
     // It will only emit the initial 'values'. Consider using a StateFlow updated in 'put' and 'commitEditor'.
     private val _stream: MutableStateFlow<Map<String, Any>> = MutableStateFlow(values)
 

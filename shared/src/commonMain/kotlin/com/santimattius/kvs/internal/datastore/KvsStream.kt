@@ -1,18 +1,20 @@
-package com.santimattius.kvs.internal.ds
+package com.santimattius.kvs.internal.datastore
+
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Represents a Key-Value Storage system.
  * This interface provides methods to store, retrieve, and manage key-value pairs.
  */
-interface KvsStandard {
-
+interface KvsStream {
+    
     /**
      * Retrieves all key-value pairs stored.
      *
      * @return A map containing all stored preferences. The values are of type [Any],
      * reflecting the type they were stored with (e.g., String, Int, Boolean).
      */
-    suspend fun getAll(): Map<String, Any>
+     fun getAllAsStream(): Flow<Map<String, Any>>
 
     /**
      * Retrieves a String value from the storage.
@@ -21,7 +23,7 @@ interface KvsStandard {
      * @param defValue The default value to return if the preference does not exist.
      * @return The preference value if it exists, or [defValue].
      */
-    suspend fun getString(key: String, defValue: String): String
+     fun getStringAsStream(key: String, defValue: String): Flow<String>
 
     /**
      * Retrieves an Int value from the storage.
@@ -30,7 +32,7 @@ interface KvsStandard {
      * @param defValue The default value to return if the preference does not exist.
      * @return The preference value if it exists, or [defValue].
      */
-    suspend fun getInt(key: String, defValue: Int): Int
+     fun getIntAsStream(key: String, defValue: Int): Flow<Int>
 
     /**
      * Retrieves a Long value from the storage.
@@ -39,7 +41,7 @@ interface KvsStandard {
      * @param defValue The default value to return if the preference does not exist.
      * @return The preference value if it exists, or [defValue].
      */
-    suspend fun getLong(key: String, defValue: Long): Long
+     fun getLongAsStream(key: String, defValue: Long): Flow<Long>
 
     /**
      * Retrieves a Float value from the storage.
@@ -48,7 +50,7 @@ interface KvsStandard {
      * @param defValue The default value to return if the preference does not exist.
      * @return The preference value if it exists, or [defValue].
      */
-    suspend fun getFloat(key: String, defValue: Float): Float
+     fun getFloatAsStream(key: String, defValue: Float): Flow<Float>
 
     /**
      * Retrieves a Boolean value from the storage.
@@ -57,5 +59,6 @@ interface KvsStandard {
      * @param defValue The default value to return if the preference does not exist.
      * @return The preference value if it exists, or [defValue].
      */
-    suspend fun getBoolean(key: String, defValue: Boolean): Boolean
+     fun getBooleanAsStream(key: String, defValue: Boolean): Flow<Boolean>
+    
 }

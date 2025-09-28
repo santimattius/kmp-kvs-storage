@@ -2,7 +2,7 @@ import SwiftUI
 import KvsStorage
 
 struct ContentView: View {
-    private let kvs = Storage.shared.kvs(name: "user_preferences")
+    private let kvs = Storage.shared.encryptKvs(name: "user_preferences", key: "secret")
     
     @State private var isDarkModeEnabled = false
     
@@ -37,9 +37,16 @@ struct ContentView: View {
     
     func updateValue(value:Bool)  {
         Task{
-            try! await kvs.edit()
+            let result = try await kvs.edit()
                 .putBoolean(key: "is_dark_mode_enabled", value: value)
-                .commit()
+                .putString(key: "test_string", value: "Hello World!")
+                .apply()
+            switch result {
+                case .success:
+                print("Successfully saved data.")
+                case .failure(let error):
+                print("Failed to save data: \(error)")
+            }
         }
         
     }

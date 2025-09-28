@@ -1,5 +1,6 @@
 package com.santimattius.kvs
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -10,10 +11,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class MainViewModel : ViewModel() {
 
-    private val kvs = Storage.kvs("user_preferences")
+    private val kvs = Storage.encryptKvs("user_preferences", "secret")
     private val inMemoryKvs = Storage.inMemoryKvs("user_preferences")
 
     private val _isDarkModeEnabled = MutableStateFlow(false)
@@ -28,7 +30,9 @@ class MainViewModel : ViewModel() {
     val isDarkModeEnabled: StateFlow<Boolean> = kvs.getBooleanAsStream(
         key = "dark_mode",
         defValue = false
-    ).stateIn(
+    ).onStart {
+        read()
+    }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(1000),
         initialValue = false
@@ -39,17 +43,25 @@ class MainViewModel : ViewModel() {
     private fun read() {
         job?.cancel()
         job = viewModelScope.launch(Dispatchers.IO) {
-            _isDarkModeEnabled.value = kvs.getBoolean("dark_mode", false)
+            Log.d("MainViewModel", "read: ${kvs.getString("token", "error")}")
         }
     }
 
     fun save(value: Boolean) {
         job?.cancel()
         job = viewModelScope.launch(Dispatchers.IO) {
+            val token = UUID.randomUUID().toString()
+            Log.d("MainViewModel", "token: $token")
             kvs.edit()
                 .putBoolean("dark_mode", value)
-                .commit()
-            //read()
+                .putString("name", "Santiago")
+                .putString("surname", "Mattiauda")
+                .putString("token", token)
+                .apply().onSuccess {
+                    Log.d("MainViewModel", "save: $it")
+                }.onFailure {
+                    Log.d("MainViewModel", "save: $it")
+                }
         }
     }
 

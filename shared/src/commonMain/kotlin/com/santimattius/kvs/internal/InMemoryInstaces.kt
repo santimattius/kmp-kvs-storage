@@ -1,6 +1,5 @@
 package com.santimattius.kvs.internal
 
-import com.santimattius.kvs.internal.InMemoryKvs
 import com.santimattius.kvs.internal.memory.InMemoryPreferences
 import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.persistentMapOf

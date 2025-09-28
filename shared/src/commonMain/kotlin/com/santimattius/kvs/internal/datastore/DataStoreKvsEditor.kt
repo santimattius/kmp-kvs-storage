@@ -1,10 +1,9 @@
-package com.santimattius.kvs.internal
+package com.santimattius.kvs.internal.datastore
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
 import com.santimattius.kvs.Kvs
+import com.santimattius.kvs.internal.datastore.storage.Storage
+import com.santimattius.kvs.internal.exception.WriteKvsException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.sync.Mutex
@@ -12,14 +11,30 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlin.concurrent.Volatile
 
+/**
+ * Implementation of [Kvs.KvsEditor] for DataStore.
+ *
+ * This class provides methods to modify key-value pairs in a batch.
+ * Changes are not applied until [commit] is called.
+ *
+ * This editor is not thread-safe for concurrent modifications before [commit].
+ * It uses a [Mutex] to ensure that the [commit] operation itself is atomic.
+ *
+ * Once [commit] has been called, the editor instance can no longer be used for further modifications.
+ *
+ * @property storage The underlying [Storage] implementation where data will be persisted.
+ * @property dispatcher The [CoroutineDispatcher] used for I/O operations during commit. Defaults to [Dispatchers.IO].
+ */
 internal class DataStoreKvsEditor(
-    private val dataStore: DataStore<Preferences>
+    private val storage: Storage<String>,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : Kvs.KvsEditor {
 
     // Mutex to ensure atomic commit operation
     private val commitMutex = Mutex()
 
     private var clearOperation = false
+
     // Note: These collections are not inherently thread-safe if modification methods (putString, etc.)
     // are called concurrently on the same instance before commit() is invoked.
     private val addValues = mutableMapOf<String, String>()
@@ -27,6 +42,7 @@ internal class DataStoreKvsEditor(
 
     @Volatile
     private var committed = false
+
     @Volatile
     private var commitInProgress = false
 
@@ -96,20 +112,19 @@ internal class DataStoreKvsEditor(
             val currentClearOperation = this.clearOperation
 
             try {
-                //TODO: review this context change
-                withContext(Dispatchers.IO){
-                    dataStore.edit { preferences ->
+                withContext(dispatcher) {
+                    storage.edit {
                         if (currentClearOperation) {
-                            preferences.clear()
+                            clear()
                             // After clearing, we still want to apply any pending additions from this session.
                             // Removals for this session are implicitly handled by the clear.
                         } else {
                             currentRemoveValues.forEach { key ->
-                                preferences.remove(stringPreferencesKey(key))
+                                remove(key)
                             }
                         }
                         currentAddValues.forEach { (key, value) ->
-                            preferences[stringPreferencesKey(key)] = value
+                            put(key, value)
                         }
                     }
                 }
@@ -118,6 +133,8 @@ internal class DataStoreKvsEditor(
                 this.addValues.clear()
                 this.removeValues.clear()
                 this.clearOperation = false
+            } catch (e: Throwable) {
+                throw WriteKvsException(message = "Error writing to storage", e)
             } finally {
                 commitInProgress = false // Reset commit in progress flag
             }
