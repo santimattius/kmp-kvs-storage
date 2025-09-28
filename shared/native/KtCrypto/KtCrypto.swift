@@ -7,7 +7,6 @@ public class KtCrypto: NSObject{
     @objc public func encrypt(input: Data, key: String) -> Data {
         do {
             let symmetricKey = makeKey(from: key)
-            print("Key bytes Encrypt:", [UInt8](symmetricKey.withUnsafeBytes { Data($0) }))
             let sealed = try AES.GCM.seal(input, using: symmetricKey)
             guard let combined = sealed.combined else {
                 throw NSError(domain: "CryptoError", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to combine sealed box"])
@@ -22,7 +21,6 @@ public class KtCrypto: NSObject{
     @objc public func decrypt(input: Data, key: String) -> Data {
         do {
             let symmetricKey = makeKey(from: key)
-            print("Key bytes Decrypt:", [UInt8](symmetricKey.withUnsafeBytes { Data($0) }))
             let box = try AES.GCM.SealedBox(combined: input)
             return try AES.GCM.open(box, using: symmetricKey)
         } catch {

@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
 
-    private val kvs = Storage.encryptKvs("user_preferences")
+    private val kvs = Storage.encryptKvs("user_preferences", "secret")
     private val inMemoryKvs = Storage.inMemoryKvs("user_preferences")
 
     private val _isDarkModeEnabled = MutableStateFlow(false)
