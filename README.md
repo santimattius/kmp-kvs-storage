@@ -50,6 +50,22 @@ private val kvs = Storage.kvs("user_preferences")
 private let kvs = Storage.shared.kvs(name: "user_preferences")
 ```
 
+#### Encrypted Storage
+
+You can also initialize an encrypted KVS on each platform:
+
+##### Android
+```kotlin
+// In your Application class or dependency injection module
+private val kvs = Storage.encryptKvs(name = "user_preferences", key = "secret")
+```
+
+##### iOS (Swift)
+```swift
+// In your AppDelegate or dependency injection setup
+private let kvs = Storage.shared.encryptKvs(name: "user_pref", key: "secret")
+```
+
 ### Basic Operations
 
 #### Storing Data
@@ -133,6 +149,146 @@ kvs.edit().apply {
     remove("old_key")
 }.commit() // All operations are atomic
 ```
+
+### Reactive Streams (Android Flow / iOS AsyncSequence)
+
+React to value changes in keys using platform-native streams:
+
+#### Android (Kotlin Flow)
+```kotlin
+// Observe a single key
+lifecycleScope.launch {
+    kvs.getStringAsStream("username", "default_user").collect { username ->
+        // React to username changes
+    }
+}
+
+// Other types
+lifecycleScope.launch {
+    kvs.getIntAsStream("user_age", 0).collect { age -> }
+}
+lifecycleScope.launch {
+    kvs.getFloatAsStream("user_score", 0f).collect { score -> }
+}
+lifecycleScope.launch {
+    kvs.getBooleanAsStream("is_premium", false).collect { isPremium -> }
+}
+lifecycleScope.launch {
+    kvs.getLongAsStream("last_login", 0L).collect { lastLogin -> }
+}
+
+// Observe all values as a map
+lifecycleScope.launch {
+    kvs.getAllAsStream().collect { allValues ->
+        // allValues: Map<String, Any?>
+    }
+}
+```
+
+#### iOS (Swift AsyncSequence)
+```swift
+// Observe a single key
+Task {
+    for await username in kvs.getStringAsStream(name: "username", defaultValue: "default_user") {
+        // React to username changes
+    }
+}
+
+// Other types
+Task {
+    for await age in kvs.getIntAsStream(name: "user_age", defaultValue: 0) {}
+}
+Task {
+    for await score in kvs.getFloatAsStream(name: "user_score", defaultValue: 0.0) {}
+}
+Task {
+    for await isPremium in kvs.getBooleanAsStream(name: "is_premium", defaultValue: false) {}
+}
+Task {
+    for await lastLogin in kvs.getLongAsStream(name: "last_login", defaultValue: 0) {}
+}
+
+// Observe all values as a dictionary
+Task {
+    for await allValues in kvs.getAllAsStream() {
+        // allValues: [String: Any?]
+    }
+}
+```
+
+### Result-based APIs (Error Handling Helpers)
+
+The library provides helper functions that wrap reads and edits into platform-native `Result` types to simplify error handling.
+
+#### Android (Kotlin Result)
+Available functions in `shared/src/commonMain/kotlin/com/santimattius/kvs/KvsExtensions.kt`:
+
+- `suspend fun Kvs.getStringAsResult(key: String, defValue: String): Result<String>`
+- `suspend fun Kvs.getIntAsResult(key: String, defValue: Int): Result<Int>`
+- `suspend fun Kvs.getLongAsResult(key: String, defValue: Long): Result<Long>`
+- `suspend fun Kvs.getFloatAsResult(key: String, defValue: Float): Result<Float>`
+- `suspend fun Kvs.getBooleanAsResult(key: String, defValue: Boolean): Result<Boolean>`
+- `suspend fun Kvs.getAllAsResult(): Result<Map<String, Any>>`
+- `suspend fun Kvs.KvsEditor.apply(): Result<Boolean>`
+
+Example usage:
+```kotlin
+lifecycleScope.launch {
+    val result = kvs.getStringAsResult("username", "guest")
+    result
+        .onSuccess { username -> /* use username */ }
+        .onFailure { error -> /* handle error */ }
+
+    val save = kvs.edit()
+        .putString("username", "john")
+        .putBoolean("is_premium", true)
+        .apply() // Result<Boolean>
+    save.onSuccess { /* committed */ }
+        .onFailure { e -> /* handle commit error */ }
+}
+```
+
+Note: these helpers execute in a non-cancellable context internally to ensure completion semantics and return failures as `Result` without throwing.
+
+#### iOS (Swift Result)
+Available functions in `shared/src/commonMain/swift/KvsExtensions.swift`:
+
+- `func getStringAsResult(key: String, defValue: String) async -> Result<String, Error>`
+- `func getIntAsResult(key: String, defValue: Int32) async -> Result<Int32, Error>`
+- `func getLongAsResult(key: String, defValue: Int64) async -> Result<Int64, Error>`
+- `func getFloatAsResult(key: String, defValue: Float) async -> Result<Float, Error>`
+- `func getBooleanAsResult(key: String, defValue: Bool) async -> Result<Bool, Error>`
+- `extension KvsKvsEditor { func apply() async -> Result<Bool, Error> }`
+
+Example usage:
+```swift
+Task {
+    let result = await kvs.getStringAsResult(key: "username", defValue: "guest")
+    switch result {
+    case .success(let username):
+        // use username
+        print(username)
+    case .failure(let error):
+        // handle error
+        print(error)
+    }
+
+    let commit = await kvs.edit()
+        .putString(key: "username", value: "john")
+        .putBoolean(key: "is_premium", value: true)
+        .apply()
+    switch commit {
+    case .success:
+        // committed
+        break
+    case .failure(let error):
+        // handle commit error
+        print(error)
+    }
+}
+```
+
+Note: `getAllAsResult()` is currently available in the Kotlin extensions. An equivalent Swift helper is not exposed at this time; you can still call `await kvs.getAll()` directly if needed.
 
 ## Best Practices
 

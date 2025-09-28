@@ -5,6 +5,7 @@ import com.santimattius.kvs.internal.datastore.encrypt.DsEncryptStorage
 import com.santimattius.kvs.internal.datastore.encrypt.Encryptor
 import com.santimattius.kvs.internal.datastore.encrypt.encryptor
 import com.santimattius.kvs.internal.datastore.storage.DsStorage
+import com.santimattius.kvs.internal.logger.NoopKvsLogger
 import com.santimattius.kvs.internal.logger.logger
 import com.santimattius.kvs.internal.provideDataStoreInstance
 import com.santimattius.kvs.internal.provideInMemoryKvsInstance
@@ -16,6 +17,23 @@ import kotlinx.coroutines.IO
  * This object provides factory methods to obtain [Kvs] implementations.
  */
 object Storage {
+
+    private var isDebug = false
+
+    /**
+     * Enables or disables debug logging for KVS operations.
+     *
+     * When debug mode is enabled, KVS operations may produce additional logging output,
+     * which can be helpful for troubleshooting and understanding the internal workings
+     * of the storage system.
+     *
+     * @param isDebug `true` to enable debug logging, `false` to disable it.
+     */
+    fun debug(isDebug: Boolean) {
+        this.isDebug = isDebug
+    }
+
+    private fun getLogger() = if (isDebug) logger() else NoopKvsLogger
 
     /**
      * Creates or retrieves a named [Kvs] instance.
@@ -56,7 +74,7 @@ object Storage {
             name = name,
             encryptor = encryptor(
                 key = key,
-                logger = logger()
+                logger = getLogger()
             )
         )
     }
@@ -78,6 +96,7 @@ object Storage {
         dataStore = DsEncryptStorage(
             dataStore = provideDataStoreInstance(name),
             encryptor = encryptor,
+            logger = getLogger(),
             dispatcher = Dispatchers.IO
         )
     )

@@ -2,6 +2,8 @@ package com.santimattius.kvs.internal.datastore
 
 import com.santimattius.kvs.Kvs
 import com.santimattius.kvs.internal.datastore.storage.Storage
+import com.santimattius.kvs.internal.exception.WriteKvsException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.sync.Mutex
@@ -9,8 +11,23 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlin.concurrent.Volatile
 
+/**
+ * Implementation of [Kvs.KvsEditor] for DataStore.
+ *
+ * This class provides methods to modify key-value pairs in a batch.
+ * Changes are not applied until [commit] is called.
+ *
+ * This editor is not thread-safe for concurrent modifications before [commit].
+ * It uses a [Mutex] to ensure that the [commit] operation itself is atomic.
+ *
+ * Once [commit] has been called, the editor instance can no longer be used for further modifications.
+ *
+ * @property storage The underlying [Storage] implementation where data will be persisted.
+ * @property dispatcher The [CoroutineDispatcher] used for I/O operations during commit. Defaults to [Dispatchers.IO].
+ */
 internal class DataStoreKvsEditor(
-    private val storage: Storage<String>
+    private val storage: Storage<String>,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : Kvs.KvsEditor {
 
     // Mutex to ensure atomic commit operation
@@ -95,8 +112,7 @@ internal class DataStoreKvsEditor(
             val currentClearOperation = this.clearOperation
 
             try {
-                //TODO: review this context change
-                withContext(Dispatchers.IO) {
+                withContext(dispatcher) {
                     storage.edit {
                         if (currentClearOperation) {
                             clear()
@@ -117,9 +133,8 @@ internal class DataStoreKvsEditor(
                 this.addValues.clear()
                 this.removeValues.clear()
                 this.clearOperation = false
-            }catch (e: Exception){
-                println("Error: $e") //TODO: logger
-                throw e
+            } catch (e: Throwable) {
+                throw WriteKvsException(message = "Error writing to storage", e)
             } finally {
                 commitInProgress = false // Reset commit in progress flag
             }

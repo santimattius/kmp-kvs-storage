@@ -40,7 +40,6 @@ private class IosEncryptor(
             val nsData = byteArray.asNSData()
             val decryptWithInput: NSData = crypto.decryptWithInput(input = nsData, key = key)
             val output = decryptWithInput.asString()
-            println("decrypt output: $output")
             return output
         } catch (e: Throwable) {
             logger.error("decrypt error: ${e.message}", e)

@@ -8,6 +8,8 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.santimattius.kvs.internal.datastore.readPreference
 import com.santimattius.kvs.internal.datastore.storage.Storage
 import com.santimattius.kvs.internal.datastore.storage.StorageOperation
+import com.santimattius.kvs.internal.exception.ReadKvsException
+import com.santimattius.kvs.internal.logger.KvsLogger
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -17,9 +19,19 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
+/**
+ * A [Storage] implementation that uses [DataStore] to store preferences with encryption.
+ * All values are stored as encrypted strings and decrypted when read.
+ *
+ * @param dataStore The [DataStore] instance to use for storing preferences.
+ * @param encryptor The [Encryptor] instance to use for encrypting and decrypting values.
+ * @param logger The [KvsLogger] instance to use for logging errors.
+ * @param dispatcher The [CoroutineDispatcher] to use for I/O operations, defaults to [Dispatchers.IO].
+ */
 internal class DsEncryptStorage(
     private val dataStore: DataStore<Preferences>,
     private val encryptor: Encryptor,
+    private val logger: KvsLogger,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : Storage<String> {
 
@@ -36,8 +48,8 @@ internal class DsEncryptStorage(
         return dataStore.data.map { preferences ->
             preferences.asMap().mapKeys { entry -> entry.key.name }
                 .mapValues { entry -> encryptor.decrypt(entry.value.toString()) }
-        }.catch {
-            println("Error: $it") //TODO: logger
+        }.catch { cause ->
+            logger.error("Error getting all preferences", cause)
             emit(emptyMap())
         }.flowOn(dispatcher)
     }
@@ -69,9 +81,9 @@ internal class DsEncryptStorage(
                     converter(encryptor.decrypt(it))
                 }
             )
-        }catch (e: Exception){
-            println("Error: $e") //TODO: logger
-            defaultValue
+        } catch (e: Throwable) {
+            logger.error("Error reading preference", e)
+            throw ReadKvsException("Error reading preference", e)
         }
     }
 
@@ -83,13 +95,24 @@ internal class DsEncryptStorage(
         preferences.readPreference(key, defaultValue, converter = {
             converter(encryptor.decrypt(it))
         })
-    }.catch {
-        println("Error: $it") //TODO: logger
+    }.catch { cause ->
+        logger.error("Error reading preference", cause)
         emit(defaultValue)
     }.flowOn(dispatcher)
 
 }
 
+/**
+ * Internal class that provides encrypted storage operations for DataStore.
+ *
+ * This class implements the [StorageOperation] interface and handles
+ * the encryption and decryption of data before storing or retrieving it
+ * from the underlying [MutablePreferences]. It is used within the context
+ * of the `edit` block in [DsEncryptStorage].
+ *
+ * @param preferences The [MutablePreferences] instance to store data in.
+ * @param encryptor The [Encryptor] instance used for data encryption and decryption.
+ */
 internal class DsEncryptStorageOperation(
     private val preferences: MutablePreferences,
     private val encryptor: Encryptor
@@ -104,7 +127,11 @@ internal class DsEncryptStorageOperation(
     }
 
     override fun put(key: String, value: String) {
-        preferences[key(key)] = encryptor.encrypt(value)
+        try {
+            preferences[key(key)] = encryptor.encrypt(value)
+        } catch (ex: Throwable) {
+            throw EncryptException("Error encrypting value", ex)
+        }
     }
 
     override fun key(name: String): Preferences.Key<String> {

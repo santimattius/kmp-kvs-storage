@@ -81,6 +81,13 @@ swiftklib {
     }
 }
 
+skie {
+    isEnabled.set(true)
+    swiftBundling {
+        enabled = true
+    }
+}
+
 mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
 

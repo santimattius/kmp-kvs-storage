@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class MainViewModel : ViewModel() {
 
@@ -42,17 +43,25 @@ class MainViewModel : ViewModel() {
     private fun read() {
         job?.cancel()
         job = viewModelScope.launch(Dispatchers.IO) {
-            Log.d("MainViewModel", "read: ${kvs.getString("name", "error")}")
+            Log.d("MainViewModel", "read: ${kvs.getString("token", "error")}")
         }
     }
 
     fun save(value: Boolean) {
         job?.cancel()
         job = viewModelScope.launch(Dispatchers.IO) {
+            val token = UUID.randomUUID().toString()
+            Log.d("MainViewModel", "token: $token")
             kvs.edit()
                 .putBoolean("dark_mode", value)
                 .putString("name", "Santiago")
-                .commit()
+                .putString("surname", "Mattiauda")
+                .putString("token", token)
+                .apply().onSuccess {
+                    Log.d("MainViewModel", "save: $it")
+                }.onFailure {
+                    Log.d("MainViewModel", "save: $it")
+                }
         }
     }
 

@@ -2,6 +2,8 @@ package com.santimattius.kvs
 
 import com.santimattius.kvs.internal.datastore.KvsStandard
 import com.santimattius.kvs.internal.datastore.KvsStream
+import com.santimattius.kvs.internal.exception.WriteKvsException
+import kotlinx.coroutines.CancellationException
 
 /**
  * Represents a Key-Value Storage system.
@@ -22,6 +24,7 @@ interface Kvs : KvsStandard, KvsStream {
          * @param value The new value for the preference.
          * @return This editor instance, to chain calls.
          */
+        @Throws(IllegalStateException::class)
         fun putString(key: String, value: String): KvsEditor
 
         /**
@@ -31,6 +34,7 @@ interface Kvs : KvsStandard, KvsStream {
          * @param value The new value for the preference.
          * @return This editor instance, to chain calls.
          */
+        @Throws(IllegalStateException::class)
         fun putInt(key: String, value: Int): KvsEditor
 
         /**
@@ -40,6 +44,7 @@ interface Kvs : KvsStandard, KvsStream {
          * @param value The new value for the preference.
          * @return This editor instance, to chain calls.
          */
+        @Throws(IllegalStateException::class)
         fun putLong(key: String, value: Long): KvsEditor
 
         /**
@@ -49,6 +54,7 @@ interface Kvs : KvsStandard, KvsStream {
          * @param value The new value for the preference.
          * @return This editor instance, to chain calls.
          */
+        @Throws(IllegalStateException::class)
         fun putFloat(key: String, value: Float): KvsEditor
 
         /**
@@ -58,6 +64,7 @@ interface Kvs : KvsStandard, KvsStream {
          * @param value The new value for the preference.
          * @return This editor instance, to chain calls.
          */
+        @Throws(IllegalStateException::class)
         fun putBoolean(key: String, value: Boolean): KvsEditor
 
         /**
@@ -66,6 +73,7 @@ interface Kvs : KvsStandard, KvsStream {
          * @param key The name of the preference to remove.
          * @return This editor instance, to chain calls.
          */
+        @Throws(IllegalStateException::class)
         fun remove(key: String): KvsEditor
 
         /**
@@ -73,12 +81,18 @@ interface Kvs : KvsStandard, KvsStream {
          *
          * @return This editor instance, to chain calls.
          */
+        @Throws(IllegalStateException::class)
         fun clear(): KvsEditor
 
         /**
          * Commits the preference changes to persistent storage.
          * This operation is performed asynchronously.
          */
+        @Throws(
+            IllegalStateException::class,
+            WriteKvsException::class,
+            CancellationException::class
+        )
         suspend fun commit()
 
     }

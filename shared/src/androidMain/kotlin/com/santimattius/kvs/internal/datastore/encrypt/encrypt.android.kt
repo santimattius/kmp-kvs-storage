@@ -7,6 +7,15 @@ internal actual fun encryptor(key: String, logger: KvsLogger): Encryptor {
     return AndroidEncryptor(key = key, logger = logger)
 }
 
+/**
+ * Android-specific implementation of the [Encryptor] interface.
+ *
+ * This class uses the [Crypto] utility for encryption and decryption operations.
+ * It also logs errors using the provided [KvsLogger].
+ *
+ * @property key The encryption key used for cryptographic operations.
+ * @property logger The logger instance for recording errors.
+ */
 private class AndroidEncryptor(
     key: String,
     private val logger: KvsLogger

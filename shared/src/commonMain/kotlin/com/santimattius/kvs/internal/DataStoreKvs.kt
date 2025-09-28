@@ -1,20 +1,16 @@
 package com.santimattius.kvs.internal
 
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.stringPreferencesKey
 import com.santimattius.kvs.Kvs
 import com.santimattius.kvs.internal.datastore.DataStoreKvsEditor
 import com.santimattius.kvs.internal.datastore.DataStoreKvsStandard
 import com.santimattius.kvs.internal.datastore.DataStoreKvsStream
 import com.santimattius.kvs.internal.datastore.KvsStandard
 import com.santimattius.kvs.internal.datastore.KvsStream
-import com.santimattius.kvs.internal.datastore.storage.DsStorage
 import com.santimattius.kvs.internal.datastore.storage.Storage
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
 /**
@@ -38,7 +34,7 @@ internal class DataStoreKvs(
      * @return A [com.santimattius.kvs.internal.datastore.DataStoreKvsEditor] instance.
      */
     override fun edit(): Kvs.KvsEditor {
-        return DataStoreKvsEditor(dataStore)
+        return DataStoreKvsEditor(dataStore, dispatcher)
     }
 
     /**
@@ -48,6 +44,6 @@ internal class DataStoreKvs(
      * @return `true` if the key exists, `false` otherwise.
      */
     override suspend fun contains(key: String): Boolean = withContext(dispatcher) {
-      dataStore.contains(key)
+        dataStore.contains(key)
     }
 }
