@@ -1,43 +1,50 @@
 package com.santimattius.kvs.internal.datastore.encrypt
 
+import com.santimattius.kvs.internal.extensions.base64ToByteArray
+import com.santimattius.kvs.internal.extensions.byteArrayToBase64
+import com.santimattius.kvs.internal.logger.KvsLogger
 import com.santimattius.kvs.native.KtCrypto
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSData
-import platform.Foundation.NSString
-import platform.Foundation.NSUTF8StringEncoding
-import platform.Foundation.create
-import platform.Foundation.dataUsingEncoding
 
-actual fun encryptor(): Encryptor {
-    return IosEncryptor()
+internal actual fun encryptor(key: String, logger: KvsLogger): Encryptor {
+    return IosEncryptor(key = key, logger = logger)
 }
 
-private class IosEncryptor : Encryptor {
+@OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
+private class IosEncryptor(
+    private val key: String,
+    private val logger: KvsLogger
+) : Encryptor {
     @OptIn(ExperimentalForeignApi::class)
     private val crypto = KtCrypto()
 
-    @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
+
     override fun encrypt(input: String): String {
-        val nsData = input.nsdata() ?: throw Throwable("")
-        return crypto.encryptWithInput(input = nsData, key = "").string().orEmpty()
+        try {
+            val nsData = input.asNSData() ?: throw EncryptException("Error convert to NSData")
+            val encryptWithInput: NSData = crypto.encryptWithInput(input = nsData, key = key)
+            val byteArray = encryptWithInput.convertToByteArray()
+            val output = byteArray.byteArrayToBase64()
+            return output
+        } catch (e: Throwable) {
+            logger.error("encrypt error: ${e.message}", e)
+            return input
+        }
     }
 
-    @OptIn(ExperimentalForeignApi::class)
     override fun decrypt(input: String): String {
-        //TODO: throw typed exception
-        val nsData = input.nsdata() ?: throw Throwable("")
-        return crypto.decryptWithInput(input = nsData, key = "").string().orEmpty()
+        try {
+            val byteArray: ByteArray = input.base64ToByteArray()
+            val nsData = byteArray.asNSData()
+            val decryptWithInput: NSData = crypto.decryptWithInput(input = nsData, key = key)
+            val output = decryptWithInput.asString()
+            println("decrypt output: $output")
+            return output
+        } catch (e: Throwable) {
+            logger.error("decrypt error: ${e.message}", e)
+            return input
+        }
     }
-
-}
-
-@Suppress("CAST_NEVER_SUCCEEDS")
-fun String.nsdata(): NSData? {
-    return (this as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-}
-
-@OptIn(BetaInteropApi::class)
-fun NSData.string(): String? {
-    return NSString.create(this, NSUTF8StringEncoding) as String?
 }

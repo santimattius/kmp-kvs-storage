@@ -117,6 +117,9 @@ internal class DataStoreKvsEditor(
                 this.addValues.clear()
                 this.removeValues.clear()
                 this.clearOperation = false
+            }catch (e: Exception){
+                println("Error: $e") //TODO: logger
+                throw e
             } finally {
                 commitInProgress = false // Reset commit in progress flag
             }

@@ -12,6 +12,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -35,6 +36,9 @@ internal class DsEncryptStorage(
         return dataStore.data.map { preferences ->
             preferences.asMap().mapKeys { entry -> entry.key.name }
                 .mapValues { entry -> encryptor.decrypt(entry.value.toString()) }
+        }.catch {
+            println("Error: $it") //TODO: logger
+            emit(emptyMap())
         }.flowOn(dispatcher)
     }
 
@@ -56,14 +60,19 @@ internal class DsEncryptStorage(
         defaultValue: V,
         converter: (String) -> V?
     ): V {
-        return dataStore.readPreference(
-            dispatcher = dispatcher,
-            key = key,
-            defaultValue = defaultValue,
-            converter = {
-                converter(encryptor.decrypt(it))
-            }
-        )
+        return try {
+            dataStore.readPreference(
+                dispatcher = dispatcher,
+                key = key,
+                defaultValue = defaultValue,
+                converter = {
+                    converter(encryptor.decrypt(it))
+                }
+            )
+        }catch (e: Exception){
+            println("Error: $e") //TODO: logger
+            defaultValue
+        }
     }
 
     override fun <T> readPreferenceAsStream(
@@ -74,6 +83,9 @@ internal class DsEncryptStorage(
         preferences.readPreference(key, defaultValue, converter = {
             converter(encryptor.decrypt(it))
         })
+    }.catch {
+        println("Error: $it") //TODO: logger
+        emit(defaultValue)
     }.flowOn(dispatcher)
 
 }

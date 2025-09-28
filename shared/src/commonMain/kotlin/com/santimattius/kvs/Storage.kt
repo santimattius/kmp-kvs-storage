@@ -5,6 +5,7 @@ import com.santimattius.kvs.internal.datastore.encrypt.DsEncryptStorage
 import com.santimattius.kvs.internal.datastore.encrypt.Encryptor
 import com.santimattius.kvs.internal.datastore.encrypt.encryptor
 import com.santimattius.kvs.internal.datastore.storage.DsStorage
+import com.santimattius.kvs.internal.logger.logger
 import com.santimattius.kvs.internal.provideDataStoreInstance
 import com.santimattius.kvs.internal.provideInMemoryKvsInstance
 import kotlinx.coroutines.Dispatchers
@@ -35,10 +36,48 @@ object Storage {
         )
     )
 
-    fun encryptKvs(name: String): Kvs = DataStoreKvs(
+    /**
+     * Creates or retrieves a named, encrypted [Kvs] instance.
+     *
+     * This function provides an implementation of the [Kvs] interface that
+     * encrypts data before storing it, typically using DataStore as the
+     * underlying persistence mechanism. Each unique [name] will correspond
+     * to a distinct, encrypted DataStore file.
+     *
+     * @param name The unique name for the encrypted KVS instance. This name is
+     *             often used as the filename for the underlying DataStore.
+     * @param key The encryption key used to secure the data. It is crucial
+     *            to manage this key securely.
+     * @return An encrypted [Kvs] instance associated with the given [name]
+     *         and [key].
+     */
+    fun encryptKvs(name: String, key: String): Kvs {
+        return encryptKvs(
+            name = name,
+            encryptor = encryptor(
+                key = key,
+                logger = logger()
+            )
+        )
+    }
+
+    /**
+     * Creates or retrieves a named, encrypted [Kvs] instance.
+     *
+     * This function provides an implementation of the [Kvs] interface that
+     * encrypts data before storing it, typically using DataStore as the backend.
+     * Each unique [name] will correspond to a distinct, encrypted DataStore file.
+     *
+     * @param name The unique name for the encrypted KVS instance. This name is often
+     *             used as the filename for the underlying DataStore.
+     * @param encryptor The [Encryptor] implementation to be used for data encryption
+     *                  and decryption.
+     * @return An encrypted [Kvs] instance associated with the given [name] and [encryptor].
+     */
+    fun encryptKvs(name: String, encryptor: Encryptor): Kvs = DataStoreKvs(
         dataStore = DsEncryptStorage(
             dataStore = provideDataStoreInstance(name),
-            encryptor = encryptor(),
+            encryptor = encryptor,
             dispatcher = Dispatchers.IO
         )
     )

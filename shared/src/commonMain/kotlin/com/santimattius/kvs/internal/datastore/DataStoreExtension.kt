@@ -28,7 +28,6 @@ internal suspend fun <T> DataStore<Preferences>.readPreference(
     defaultValue: T,
     converter: (String) -> T?
 ): T = withContext(dispatcher) {
-    val preferencesKey = stringPreferencesKey(key)
     // Use data.first() to get the current snapshot of preferences.
     // Using .last() on DataStore's Flow would suspend indefinitely.
     val currentPreferences = data.first()

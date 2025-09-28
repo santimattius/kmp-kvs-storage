@@ -10,6 +10,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -29,6 +30,9 @@ internal class DsStorage(
     override fun getAllAsStream(): Flow<Map<String, Any>> {
         return dataStore.data.map { preferences ->
             preferences.asMap().mapKeys { entry -> entry.key.name }
+        }.catch { e ->
+            println("Error: $e") //TODO: logger
+            emit(emptyMap())
         }.flowOn(dispatcher)
     }
 
@@ -50,12 +54,17 @@ internal class DsStorage(
         defaultValue: V,
         converter: (String) -> V?
     ): V {
-        return dataStore.readPreference(
-            dispatcher = dispatcher,
-            key = key,
-            defaultValue = defaultValue,
-            converter = converter
-        )
+        return try {
+            dataStore.readPreference(
+                dispatcher = dispatcher,
+                key = key,
+                defaultValue = defaultValue,
+                converter = converter
+            )
+        } catch (e: Exception) {
+            println("Error: $e") //TODO: logger
+            defaultValue
+        }
     }
 
     override fun <T> readPreferenceAsStream(
@@ -64,6 +73,9 @@ internal class DsStorage(
         converter: (String) -> T?
     ): Flow<T> = dataStore.data.map { preferences ->
         preferences.readPreference(key, defaultValue, converter)
+    }.catch { e ->
+        println("Error: $e") //TODO: logger
+        emit(defaultValue)
     }.flowOn(dispatcher)
 
 }

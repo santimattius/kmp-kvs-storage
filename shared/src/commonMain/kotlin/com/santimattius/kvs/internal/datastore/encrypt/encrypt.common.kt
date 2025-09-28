@@ -1,3 +1,5 @@
 package com.santimattius.kvs.internal.datastore.encrypt
 
-expect fun encryptor(): Encryptor
+import com.santimattius.kvs.internal.logger.KvsLogger
+
+internal expect fun encryptor(key: String, logger: KvsLogger): Encryptor
