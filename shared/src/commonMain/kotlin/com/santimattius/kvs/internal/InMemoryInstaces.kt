@@ -18,7 +18,12 @@ private val inMemoryInstances =
 @OptIn(InternalCoroutinesApi::class)
 private val lock = SynchronizedObject()
 
-
+/**
+ * Provides an in-memory KVS instance for the given name.
+ * This function ensures that only one instance of [InMemoryKvs] is created for each name.
+ * @param name The name of the in-memory KVS.
+ * @return An [InMemoryKvs] instance.
+ */
 @OptIn(InternalCoroutinesApi::class, ExperimentalAtomicApi::class)
 internal fun provideInMemoryKvsInstance(name: String): InMemoryKvs {
     val persistentMap = inMemoryInstances.load()

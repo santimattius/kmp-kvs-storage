@@ -9,10 +9,11 @@ plugins {
     alias(libs.plugins.skie)
     alias(libs.plugins.swiftklib)
     alias(libs.plugins.mavenPublish)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 group = "io.github.santimattius"
-version = "1.1.0"
+version = "1.2.0-APLHA01"
 
 kotlin {
     androidLibrary {
@@ -66,6 +67,8 @@ kotlin {
             implementation(libs.androidx.datastore.preferences)
 
             implementation(libs.kotlinx.collections.immutable)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.serialization.protobuf)
         }
 
         commonTest.dependencies {
