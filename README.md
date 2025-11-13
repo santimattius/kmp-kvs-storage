@@ -104,6 +104,39 @@ kvs.edit()
     .commit()
 ```
 
+### Single Document Storage (`Storage.document`)
+
+Store and retrieve a single serializable object (e.g., a profile) as a document.
+
+#### Android (Kotlin)
+```kotlin
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class Profile(val username: String, val email: String)
+
+val document = Storage.document("profile")
+// val document = Storage.encryptDocument("profile", "secret")
+
+val userProfile = Profile(username = "santimattius", email = "email@example.com")
+document.put(userProfile)
+
+val result: Profile? = document.get()
+```
+
+#### iOS (Swift)
+```swift
+struct Profile: Codable { let username: String; let email: String }
+
+let document = Storage.shared.document(name: "profile")
+// let document = Storage.shared.encryptDocument(name: "profile", secretKey: "secret")
+
+let profile = Profile(username: "santimattius", email: "email@example.com")
+try await document.put(value: profile)
+
+let saved: Profile = try await document.get()
+```
+
 ### Advanced Usage
 
 #### In-Memory Storage for Testing

@@ -5,6 +5,8 @@ import com.santimattius.kvs.internal.datastore.encrypt.DsEncryptStorage
 import com.santimattius.kvs.internal.datastore.encrypt.Encryptor
 import com.santimattius.kvs.internal.datastore.encrypt.encryptor
 import com.santimattius.kvs.internal.datastore.storage.DsStorage
+import com.santimattius.kvs.internal.document.DataStoreDocument
+import com.santimattius.kvs.internal.document.provideDocumentDataStoreInstance
 import com.santimattius.kvs.internal.logger.NoopKvsLogger
 import com.santimattius.kvs.internal.logger.logger
 import com.santimattius.kvs.internal.provideDataStoreInstance
@@ -115,4 +117,44 @@ object Storage {
      * @return An in-memory [Kvs] instance associated with the given [name].
      */
     fun inMemoryKvs(name: String): Kvs = provideInMemoryKvsInstance(name)
+
+    /**
+     * Documents a class, function, or property.
+     *
+     * This is a placeholder function intended to be documented. It currently does nothing and serves
+     * only as an example for documentation generation.
+     *
+     * @param name A string parameter, its purpose is yet to be defined.
+     * @return A string, the content of which is currently undefined.
+     */
+    fun document(name: String): Document {
+        val dataStore = provideDocumentDataStoreInstance(name, Encryptor.None)
+        return DataStoreDocument(dataStore)
+    }
+
+    /**
+     * Creates or retrieves a named, encrypted [Document] instance using a custom [Encryptor].
+     *
+     * This function provides an implementation of the [Kvs] interface that
+     * encrypts data before storing it, typically using DataStore as the backend.
+     * Each unique [name] will correspond to a distinct, encrypted DataStore file.
+     * This overload allows for providing a custom encryption and decryption logic.
+     *
+     * @param name The unique name for the encrypted KVS instance. This name is often
+     *             used as the filename for the underlying DataStore.
+     * @param encryptor The [Encryptor] implementation to be used for data encryption
+     *                  and decryption.
+     * @return An encrypted [Document] instance associated with the given [name] and [encryptor].
+     */
+    fun encryptDocument(name: String, secretKey: String): Document {
+        val dataStore = provideDocumentDataStoreInstance(
+            name = name,
+            encryptor = encryptor(
+                key = secretKey,
+                logger = getLogger()
+            )
+        )
+        return DataStoreDocument(dataStore)
+    }
+
 }

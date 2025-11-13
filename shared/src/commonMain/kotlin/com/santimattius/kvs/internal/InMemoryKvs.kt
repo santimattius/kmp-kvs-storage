@@ -11,6 +11,12 @@ import kotlinx.coroutines.internal.SynchronizedObject
 import kotlinx.coroutines.internal.synchronized
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
+/**
+ * An in-memory implementation of the [Kvs] interface.
+ * This implementation is intended for testing purposes and does not persist data.
+ * @param preferences The in-memory preferences store.
+ * @param lock A lock object for synchronization.
+ */
 @OptIn(InternalCoroutinesApi::class, ExperimentalAtomicApi::class)
 internal class InMemoryKvs(
     private val preferences: InMemoryPreferences,
@@ -28,6 +34,10 @@ internal class InMemoryKvs(
         preferences.commitEditor(editorData)
     }
 
+    /**
+     * An in-memory implementation of the [Kvs.KvsEditor] interface.
+     * @param kvs The [InMemoryKvs] instance.
+     */
     internal class InMemoryKvsEditor(private val kvs: InMemoryKvs) : Kvs.KvsEditor {
 
         private val editorData: MutableMap<String, Any?> = mutableMapOf()

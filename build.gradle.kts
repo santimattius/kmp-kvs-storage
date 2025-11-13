@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.androidKMPLibrary) apply false
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
+    alias(libs.plugins.kotlinSerialization) apply false
     alias(libs.plugins.skie) apply false
     alias(libs.plugins.swiftklib) apply false
     alias(libs.plugins.mavenPublish) apply false

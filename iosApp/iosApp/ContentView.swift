@@ -4,6 +4,8 @@ import KvsStorage
 struct ContentView: View {
     private let kvs = Storage.shared.encryptKvs(name: "user_preferences", key: "secret")
     
+    private let document = Storage.shared.document(name: "profile")
+    
     @State private var isDarkModeEnabled = false
     
     var body: some View {
@@ -50,6 +52,28 @@ struct ContentView: View {
         }
         
     }
+    
+    func updateDocument()  {
+        Task{
+            do {
+                let document = Storage.shared.document(name: "profile")
+                //let document = Storage.shared.encryptDocument(name: "profile", secretKey: "secret")
+                
+                let userProfile = Profile(username: "santimattius", email: "email@example.com")
+                try await document.put(value: userProfile)
+                
+                let result: Profile = try await document.get()
+                print(result)
+            } catch {
+                print(error)
+            }
+        }
+    }
+}
+
+struct Profile: Codable {
+    var username: String
+    var email:String
 }
 
 struct ContentView_Previews: PreviewProvider {

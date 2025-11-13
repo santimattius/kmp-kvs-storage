@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import java.util.UUID
 
 class MainViewModel : ViewModel() {
@@ -44,6 +45,7 @@ class MainViewModel : ViewModel() {
         job?.cancel()
         job = viewModelScope.launch(Dispatchers.IO) {
             Log.d("MainViewModel", "read: ${kvs.getString("token", "error")}")
+            updateDocument()
         }
     }
 
@@ -64,5 +66,23 @@ class MainViewModel : ViewModel() {
                 }
         }
     }
+
+    fun updateDocument() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val document = Storage.document("profile")
+            //val document = Storage.encryptDocument("profile", "secret")
+
+            val userProfile = Profile(
+                username = "santimattius",
+                email = "email@example.com"
+            )
+            document.put(userProfile)
+            val result: Profile? = document.get()
+            Log.d("MainViewModel", "updateDocument: $result")
+        }
+    }
+
+    @Serializable
+    data class Profile(val username: String, val email: String)
 
 }

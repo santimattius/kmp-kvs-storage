@@ -21,6 +21,12 @@ private val dataStoreInstances =
 @OptIn(InternalCoroutinesApi::class)
 private val lock = SynchronizedObject()
 
+/**
+ * Provides a [DataStore] instance for the given name.
+ * This function ensures that only one instance of [DataStore] is created for each name.
+ * @param name The name of the DataStore.
+ * @return A [DataStore] instance.
+ */
 @OptIn(InternalCoroutinesApi::class, ExperimentalAtomicApi::class)
 internal fun provideDataStoreInstance(name: String): DataStore<Preferences> {
     val persistentMap = dataStoreInstances.load()
@@ -38,11 +44,28 @@ internal fun provideDataStoreInstance(name: String): DataStore<Preferences> {
 }
 
 /**
- *   Gets the singleton DataStore instance, creating it if necessary.
+ * Creates a [DataStore] instance.
+ * @param producePath A function that returns the path to the DataStore file.
+ * @return A [DataStore] instance.
  */
 internal fun createDataStore(producePath: () -> String): DataStore<Preferences> =
     PreferenceDataStoreFactory.createWithPath(
         produceFile = { producePath().toPath() }
     )
 
+/**
+ * Gets a [DataStore] instance for the given name.
+ * This is an expected function that must be implemented in the platform-specific code.
+ * @param name The name of the DataStore.
+ * @return A [DataStore] instance.
+ */
 internal expect fun getDataStore(name: String): DataStore<Preferences>
+
+
+/**
+ * Produces the path for the DataStore file.
+ * This is an expected function that must be implemented in the platform-specific code.
+ * @param name The name of the DataStore.
+ * @return The path to the DataStore file.
+ */
+internal expect fun producePath(name: String):String
