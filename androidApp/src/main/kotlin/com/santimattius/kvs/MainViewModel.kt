@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import java.util.UUID
+import kotlin.time.Duration.Companion.hours
 
 class MainViewModel : ViewModel() {
 
@@ -46,6 +47,7 @@ class MainViewModel : ViewModel() {
         job = viewModelScope.launch(Dispatchers.IO) {
             Log.d("MainViewModel", "read: ${kvs.getString("token", "error")}")
             updateDocument()
+            tempKey(UUID.randomUUID().toString())
         }
     }
 
@@ -79,6 +81,16 @@ class MainViewModel : ViewModel() {
             document.put(userProfile)
             val result: Profile? = document.get()
             Log.d("MainViewModel", "updateDocument: $result")
+        }
+    }
+
+    fun tempKey(token: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val kvsTemp = Storage.kvs("secure", encrypted = true)
+            kvsTemp.edit()
+                .putString("name", "Santiago") // without TTL
+                .putString(key = "token", value = token, duration = 1.hours) // with TTL
+                .commit()
         }
     }
 
