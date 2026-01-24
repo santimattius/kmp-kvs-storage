@@ -5,6 +5,10 @@ plugins {
     alias(libs.plugins.composeCompiler)
 }
 
+kotlin {
+    jvmToolchain(11)
+}
+
 android {
     namespace = "com.santimattius.kvs"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -29,9 +33,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions{
-        jvmTarget = JavaVersion.VERSION_11.toString()
     }
 }
 
