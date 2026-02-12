@@ -5,6 +5,7 @@ import com.santimattius.kvs.internal.datastore.KvsStream
 import com.santimattius.kvs.internal.ttl.TTLEntity
 import com.santimattius.kvs.internal.ttl.TtlManager
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 /**
@@ -14,8 +15,9 @@ import kotlinx.coroutines.flow.map
  * changes to various data types stored in a [DataStore] as a [Flow]. Expired keys are automatically
  * filtered out from the stream emissions.
  *
- * **Note:** Stream operations only filter expired keys but do not perform cleanup.
- * Cleanup is handled by standard operations in [TtlKvsExtendedStandard].
+ * **GC-friendly:** Uses [distinctUntilChanged] so the same filtered map is not re-emitted,
+ * reducing allocations when DataStore emits repeatedly with unchanged content.
+ * Cleanup is handled by [TtlKvsExtendedStandard.getAll] or the background [com.santimattius.kvs.internal.ttl.cleanup.CleanupJob].
  *
  * @property ds The [DataStore] instance storing [TTLEntity] objects.
  * @property ttlManager The [TtlManager] instance for expiration checks. Defaults to a new instance.
@@ -34,10 +36,13 @@ internal class TtlKvsExtendedStream(
      *         and values are of type [Any], reflecting their original stored type.
      */
     override fun getAllAsStream(): Flow<Map<String, Any>> {
-        return ds.data.map { allValues ->
-            allValues.filter { (_, entity) -> !isExpired(entity) }
-                .mapValues { it.value.value }
-        }
+        return ds.data
+            .map { allValues ->
+                buildMap {
+                    for ((k, entity) in allValues) if (!isExpired(entity)) put(k, entity.value)
+                }
+            }
+            .distinctUntilChanged()
     }
 
     /**
@@ -142,13 +147,15 @@ internal class TtlKvsExtendedStream(
      * @return A [Flow] emitting the converted value or [defValue].
      */
     private fun <T> getOrDefault(key: String, defValue: T, convert: (String) -> T?): Flow<T> {
-        return ds.data.map {
-            val entity = it[key]
-            when {
-                entity == null -> defValue
-                isExpired(entity) -> defValue
-                else -> convert(entity.value) ?: defValue
+        return ds.data
+            .map {
+                val entity = it[key]
+                when {
+                    entity == null -> defValue
+                    isExpired(entity) -> defValue
+                    else -> convert(entity.value) ?: defValue
+                }
             }
-        }
+            .distinctUntilChanged()
     }
 }

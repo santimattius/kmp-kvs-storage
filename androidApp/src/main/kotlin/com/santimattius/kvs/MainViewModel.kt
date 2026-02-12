@@ -3,6 +3,7 @@ package com.santimattius.kvs
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.santimattius.kvs.internal.ttl.Ttl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -86,7 +87,12 @@ class MainViewModel : ViewModel() {
 
     fun tempKey(token: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val kvsTemp = Storage.kvs("secure", encrypted = true)
+            //ttl for all keys in the kvs
+            val globalTtt: Ttl = object : Ttl {
+                override fun value() = 1.hours.inWholeMilliseconds
+            }
+
+            val kvsTemp = Storage.kvs("secure", ttl = globalTtt, encrypted = true)
             kvsTemp.edit()
                 .putString("name", "Santiago") // without TTL
                 .putString(key = "token", value = token, duration = 1.hours) // with TTL

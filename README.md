@@ -166,6 +166,40 @@ fun `test kvs operations`() = runTest {
 // private let testKvs = Storage.shared.inMemoryKvs(name: "test_preferences")
 ```
 
+#### TTL (Time-To-Live) — Experimental
+
+**Experimental:** The TTL API is experimental and may change in future releases. Use `@OptIn(ExperimentalKvsTtl::class)` when using TTL in Kotlin.
+
+Storage with TTL allows keys to expire after a duration. You can set a default TTL for the instance and optionally override it per key.
+
+```kotlin
+@OptIn(ExperimentalKvsTtl::class)
+fun createCache() {
+    val ttl = object : Ttl {
+        override fun value() = kotlin.time.Duration.ofHours(1).inWholeMilliseconds
+    }
+    val cache = Storage.kvs("cache", ttl = ttl)
+
+    // Uses default TTL (1 hour)
+    cache.edit().putString("key1", "value1").commit()
+
+    // Override TTL for this key (30 minutes)
+    cache.edit().putString("key2", "value2", kotlin.time.Duration.ofMinutes(30)).commit()
+
+    // Expired keys return the default value; cleanup runs in batch via getAll() or CleanupJob
+    val value = cache.getString("key1", "default")
+
+    // Optional: background cleanup job (recommended for TTL storage)
+    cache.cleanupJob(kotlin.time.Duration.ofMinutes(10)).start(applicationScope)
+}
+```
+
+| API | Description |
+|-----|-------------|
+| `Storage.kvs(name, ttl, encrypted)` | Creates a [KvsExtended] instance with optional default TTL and encryption. |
+| `KvsExtended.edit().putString(key, value, duration)` | Overloads with `duration` set per-key TTL. |
+| `KvsExtended.cleanupJob(interval)` | Returns a job that periodically removes expired keys on a background dispatcher. |
+
 #### Checking for Key Existence
 ```kotlin
 lifecycleScope.launch {

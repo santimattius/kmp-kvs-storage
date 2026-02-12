@@ -1,10 +1,14 @@
 package com.santimattius.kvs.internal.ttl
 
+import com.santimattius.kvs.ExperimentalKvsTtl
+
 /**
  * Represents a Time-To-Live (TTL) configuration.
  *
  * This interface provides a way to specify TTL values for key-value storage.
  * Implementations should return the TTL duration in milliseconds.
+ *
+ * **Experimental:** Part of the experimental TTL API. Opt in with `@OptIn(ExperimentalKvsTtl::class)`.
  *
  * @sample
  * ```
@@ -13,6 +17,7 @@ package com.santimattius.kvs.internal.ttl
  * }
  * ```
  */
+@ExperimentalKvsTtl
 interface Ttl {
 
     /**

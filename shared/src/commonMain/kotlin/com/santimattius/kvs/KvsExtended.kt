@@ -10,6 +10,9 @@ import kotlin.time.Duration
 /**
  * Represents a Key-Value Storage system with Time-To-Live (TTL) support.
  *
+ * **Experimental:** This interface is part of the experimental TTL feature. The API may change
+ * in future releases. Opt in with `@OptIn(ExperimentalKvsTtl::class)` when using [KvsExtended].
+ *
  * This interface extends [KvsStandard] and [KvsStream] to provide automatic expiration
  * of stored keys based on TTL configuration. Keys can have individual TTL values or use
  * a default TTL configured at the instance level.
@@ -29,6 +32,7 @@ import kotlin.time.Duration
  *     .commit()
  * ```
  */
+@ExperimentalKvsTtl
 interface KvsExtended : KvsStandard, KvsStream {
 
     /**

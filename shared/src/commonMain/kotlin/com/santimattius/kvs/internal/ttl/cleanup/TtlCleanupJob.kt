@@ -4,6 +4,8 @@ import androidx.datastore.core.DataStore
 import com.santimattius.kvs.internal.ttl.TTLEntity
 import com.santimattius.kvs.internal.ttl.TtlManager
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -39,9 +41,9 @@ interface CleanupJob {
 /**
  * Background cleanup job that periodically removes expired keys from TTL-enabled storage.
  *
- * This job runs in the background and periodically scans the storage for expired keys,
- * removing them in batches. It only performs cleanup when the number of expired keys exceeds
- * a threshold (100 keys) to avoid unnecessary I/O operations.
+ * This job runs in the background on [Dispatchers.IO] and periodically scans the storage
+ * for expired keys, removing them in a single batch. Running off the main thread avoids
+ * UI jank and reduces GC pressure on the main thread.
  *
  * **Use Cases:**
  * - High-volume scenarios where keys may not be accessed frequently
@@ -74,11 +76,11 @@ internal class TtlCleanupJob(
      * @return A [Job] instance that can be used to cancel or monitor the cleanup job.
      */
     override fun start(scope: CoroutineScope): Job {
-        return scope.launch {
+        return scope.launch(Dispatchers.IO) {
             while (isActive) {
                 try {
                     cleanupExpiredKeys()
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     // Log error but continue running
                 }
                 delay(interval)
@@ -89,17 +91,18 @@ internal class TtlCleanupJob(
     /**
      * Performs cleanup of expired keys from the storage.
      *
-     * This method scans all keys, identifies expired ones, and removes them in a batch operation.
-     * Cleanup only occurs if the number of expired keys exceeds the threshold (100 keys)
-     * to optimize performance.
+     * Scans all keys, identifies expired ones, and removes them in a single batch.
+     * Runs on the same dispatcher as the job ([Dispatchers.IO]) to keep I/O off the main thread.
      */
     private suspend fun cleanupExpiredKeys() {
         val all = dataStore.data.first()
-        val expiredKeys = all.filter { (_, entity) ->
-            entity.expiresAt != null && ttlManager.isExpired(entity.expiresAt)
-        }.keys
+        val expiredKeys = buildSet {
+            for ((k, entity) in all) {
+                if (entity.expiresAt != null && ttlManager.isExpired(entity.expiresAt)) add(k)
+            }
+        }
 
-        if (expiredKeys.isNotEmpty() && expiredKeys.size > 100) { // Threshold
+        if (expiredKeys.isNotEmpty()) {
             dataStore.updateData { data ->
                 data.toMutableMap().apply {
                     expiredKeys.forEach { remove(it) }

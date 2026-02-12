@@ -13,9 +13,11 @@ import kotlinx.coroutines.flow.first
  * synchronously retrieve various data types from a [DataStore] while automatically handling
  * expiration. Expired keys are filtered out and cleaned up using lazy cleanup strategy.
  *
- * **Lazy Cleanup Strategy:**
- * - `getAll()`: Cleans up all expired keys in batch before returning results
- * - Individual getters (`getString()`, `getInt()`, etc.): Clean up expired keys when detected
+ * **Batch-only cleanup (GC-friendly):**
+ * - `getAll()`: Cleans up all expired keys in batch before returning results.
+ * - Individual getters (`getString()`, `getInt()`, etc.): Return [defValue] for expired keys
+ *   without performing per-key removal; cleanup is left to [getAll] or [CleanupJob].
+ *   This avoids full map copy on every expired read and reduces GC pressure on Android.
  *
  * @property ds The [DataStore] instance storing [TTLEntity] objects.
  * @property ttlManager The [TtlManager] instance for expiration checks. Defaults to a new instance.
@@ -35,7 +37,9 @@ internal class TtlKvsExtendedStandard(
      */
     override suspend fun getAll(): Map<String, Any> {
         val all = ds.data.first()
-        val expiredKeys = all.filter { (_, entity) -> isExpired(entity) }.keys
+        val expiredKeys = buildSet {
+            for ((k, entity) in all) if (isExpired(entity)) add(k)
+        }
         if (expiredKeys.isNotEmpty()) {
             ds.updateData { data ->
                 data.toMutableMap().apply {
@@ -43,13 +47,16 @@ internal class TtlKvsExtendedStandard(
                 }
             }
         }
-        return all.filter { (_, entity) -> !isExpired(entity) }.mapValues { it.value.value }
+        return buildMap {
+            for ((k, entity) in all) if (!isExpired(entity)) put(k, entity.value)
+        }
     }
 
     /**
      * Retrieves a String value from the storage.
      *
-     * If the key is expired, it will be automatically removed and [defValue] will be returned.
+     * If the key is expired, [defValue] is returned. Expired keys are removed in batch by
+     * [getAll] or by the background [com.santimattius.kvs.internal.ttl.cleanup.CleanupJob], not on each read (to reduce GC pressure).
      *
      * @param key The name of the preference to retrieve.
      * @param defValue The default value to return if the preference does not exist or is expired.
@@ -62,7 +69,8 @@ internal class TtlKvsExtendedStandard(
     /**
      * Retrieves an Int value from the storage.
      *
-     * If the key is expired, it will be automatically removed and [defValue] will be returned.
+     * If the key is expired, [defValue] is returned. Expired keys are removed in batch by
+     * [getAll] or by the background [com.santimattius.kvs.internal.ttl.cleanup.CleanupJob], not on each read (to reduce GC pressure).
      *
      * @param key The name of the preference to retrieve.
      * @param defValue The default value to return if the preference does not exist or is expired.
@@ -75,7 +83,8 @@ internal class TtlKvsExtendedStandard(
     /**
      * Retrieves a Long value from the storage.
      *
-     * If the key is expired, it will be automatically removed and [defValue] will be returned.
+     * If the key is expired, [defValue] is returned. Expired keys are removed in batch by
+     * [getAll] or by the background [com.santimattius.kvs.internal.ttl.cleanup.CleanupJob], not on each read (to reduce GC pressure).
      *
      * @param key The name of the preference to retrieve.
      * @param defValue The default value to return if the preference does not exist or is expired.
@@ -88,7 +97,8 @@ internal class TtlKvsExtendedStandard(
     /**
      * Retrieves a Float value from the storage.
      *
-     * If the key is expired, it will be automatically removed and [defValue] will be returned.
+     * If the key is expired, [defValue] is returned. Expired keys are removed in batch by
+     * [getAll] or by the background [com.santimattius.kvs.internal.ttl.cleanup.CleanupJob], not on each read (to reduce GC pressure).
      *
      * @param key The name of the preference to retrieve.
      * @param defValue The default value to return if the preference does not exist or is expired.
@@ -101,7 +111,8 @@ internal class TtlKvsExtendedStandard(
     /**
      * Retrieves a Boolean value from the storage.
      *
-     * If the key is expired, it will be automatically removed and [defValue] will be returned.
+     * If the key is expired, [defValue] is returned. Expired keys are removed in batch by
+     * [getAll] or by the background [com.santimattius.kvs.internal.ttl.cleanup.CleanupJob], not on each read (to reduce GC pressure).
      *
      * @param key The name of the preference to retrieve.
      * @param defValue The default value to return if the preference does not exist or is expired.
@@ -124,10 +135,8 @@ internal class TtlKvsExtendedStandard(
     }
 
     /**
-     * Retrieves a value from storage with lazy cleanup of expired keys.
-     *
-     * This method implements lazy cleanup: if an expired key is detected during access,
-     * it is automatically removed from storage before returning the default value.
+     * Retrieves a value from storage. Expired keys return [defValue] without performing
+     * per-key removal to avoid full map copy and GC pressure (cleanup is batch-only).
      *
      * @param T The type of value to retrieve.
      * @param key The key to retrieve.
@@ -137,15 +146,7 @@ internal class TtlKvsExtendedStandard(
      */
     private suspend fun <T> getOrDefault(key: String, defValue: T, convert: (String) -> T?): T {
         val entity = ds.data.first()[key] ?: return defValue
-        if (isExpired(entity)) {
-            // Lazy cleanup: remove expired key when detected
-            ds.updateData { data ->
-                data.toMutableMap().apply {
-                    remove(key)
-                }
-            }
-            return defValue
-        }
+        if (isExpired(entity)) return defValue
         return convert(entity.value) ?: defValue
     }
 }

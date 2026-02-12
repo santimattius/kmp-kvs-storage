@@ -1,3 +1,4 @@
+@file:OptIn(ExperimentalKvsTtl::class)
 package com.santimattius.kvs
 
 import com.santimattius.kvs.internal.DataStoreKvs
@@ -85,6 +86,9 @@ object Storage {
     /**
      * Creates or retrieves a named [KvsExtended] instance with Time-To-Live (TTL) support.
      *
+     * **Experimental:** TTL is an experimental feature. The API may change in future releases.
+     * Opt in with `@OptIn(ExperimentalKvsTtl::class)` when using this overload.
+     *
      * This function provides an implementation of the [KvsExtended] interface with automatic
      * expiration of stored keys based on TTL configuration. Keys can have individual TTL values
      * or use a default TTL configured at the instance level.
@@ -125,6 +129,7 @@ object Storage {
      * val secureCache = Storage.kvs("secure", ttl = ttl, encrypted = true)
      * ```
      */
+    @ExperimentalKvsTtl
     fun kvs(name: String, ttl: Ttl? = null, encrypted: Boolean = false): KvsExtended =
         TtlKvsExtended(
             dataStore = provideTtlDataStoreInstance(
