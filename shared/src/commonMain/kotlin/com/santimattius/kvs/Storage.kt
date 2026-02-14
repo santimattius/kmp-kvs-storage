@@ -1,3 +1,4 @@
+@file:OptIn(ExperimentalKvsTtl::class)
 package com.santimattius.kvs
 
 import com.santimattius.kvs.internal.DataStoreKvs
@@ -11,8 +12,13 @@ import com.santimattius.kvs.internal.logger.NoopKvsLogger
 import com.santimattius.kvs.internal.logger.logger
 import com.santimattius.kvs.internal.provideDataStoreInstance
 import com.santimattius.kvs.internal.provideInMemoryKvsInstance
+import com.santimattius.kvs.internal.ttl.Ttl
+import com.santimattius.kvs.internal.ttl.TtlManager
+import com.santimattius.kvs.internal.ttl.extended.TtlKvsExtended
+import com.santimattius.kvs.internal.ttl.provideTtlDataStoreInstance
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Entry point for accessing Key-Value Storage (KVS) instances.
@@ -48,13 +54,93 @@ object Storage {
      * @param name The unique name for the KVS instance. This name is often
      *             used as the filename for the underlying DataStore.
      * @return A [Kvs] instance associated with the given [name].
+     * @deprecated Use [simpleKvs] instead.
      */
-    fun kvs(name: String): Kvs = DataStoreKvs(
+    @Deprecated("use simpleKvs", ReplaceWith("simpleKvs(name)"))
+    fun kvs(name: String): Kvs = simpleKvs(name)
+
+    /**
+     * Creates or retrieves a named [Kvs] instance without TTL support.
+     *
+     * This function provides a standard implementation of the [Kvs] interface,
+     * backed by DataStore. Keys stored in this instance will not expire.
+     * Each unique [name] will correspond to a distinct DataStore file.
+     *
+     * @param name The unique name for the KVS instance. This name is often
+     *             used as the filename for the underlying DataStore.
+     * @return A [Kvs] instance associated with the given [name].
+     *
+     * @sample
+     * ```
+     * val kvs = Storage.simpleKvs("preferences")
+     * kvs.edit().putString("key", "value").commit()
+     * ```
+     */
+    fun simpleKvs(name: String): Kvs = DataStoreKvs(
         dataStore = DsStorage(
             dataStore = provideDataStoreInstance(name),
             dispatcher = Dispatchers.IO
         )
     )
+
+    /**
+     * Creates or retrieves a named [KvsExtended] instance with Time-To-Live (TTL) support.
+     *
+     * **Experimental:** TTL is an experimental feature. The API may change in future releases.
+     * Opt in with `@OptIn(ExperimentalKvsTtl::class)` when using this overload.
+     *
+     * This function provides an implementation of the [KvsExtended] interface with automatic
+     * expiration of stored keys based on TTL configuration. Keys can have individual TTL values
+     * or use a default TTL configured at the instance level.
+     *
+     * **TTL Features:**
+     * - Default TTL: Configured via [ttl] parameter, applies to all keys without explicit TTL
+     * - Per-key TTL: Override default TTL for specific keys when storing values
+     * - Automatic expiration: Expired keys are automatically filtered and cleaned up
+     * - Lazy cleanup: Keys are removed when accessed or via background cleanup job
+     *
+     * **Encryption:**
+     * When [encrypted] is `true`, the instance name is used as the encryption key.
+     * For custom encryption, use the overload with an [Encryptor] parameter.
+     *
+     * @param name The unique name for the KVS instance. This name is used as the filename
+     *             for the underlying DataStore and as the encryption key if [encrypted] is `true`.
+     * @param ttl Optional default TTL for all keys. If `null`, keys without explicit TTL
+     *            will not expire. If provided, all keys will use this TTL unless overridden.
+     * @param encrypted If `true`, data will be encrypted using the instance name as the key.
+     *                 Defaults to `false`.
+     * @return A [KvsExtended] instance with TTL support associated with the given [name].
+     *
+     * @sample
+     * ```
+     * // Create KVS with default TTL of 1 hour
+     * val ttl = object : Ttl {
+     *     override fun value() = Duration.ofHours(1).inWholeMilliseconds
+     * }
+     * val cache = Storage.kvs("cache", ttl = ttl)
+     *
+     * // Store with default TTL
+     * cache.edit().putString("key1", "value1").commit()
+     *
+     * // Override TTL for specific key
+     * cache.edit().putString("key2", "value2", Duration.ofMinutes(30)).commit()
+     *
+     * // Encrypted TTL-enabled storage
+     * val secureCache = Storage.kvs("secure", ttl = ttl, encrypted = true)
+     * ```
+     */
+    @ExperimentalKvsTtl
+    fun kvs(name: String, ttl: Ttl? = null, encrypted: Boolean = false): KvsExtended =
+        TtlKvsExtended(
+            dataStore = provideTtlDataStoreInstance(
+                name = name,
+                encryptor = if (encrypted) encryptor(
+                    key = name,
+                    logger = getLogger()
+                ) else Encryptor.None
+            ),
+            ttlManager = TtlManager(defaultTtl = ttl?.value()?.milliseconds)
+        )
 
     /**
      * Creates or retrieves a named, encrypted [Kvs] instance.
@@ -70,8 +156,33 @@ object Storage {
      *            to manage this key securely.
      * @return An encrypted [Kvs] instance associated with the given [name]
      *         and [key].
+     * @deprecated Use [simpleEncryptKvs] instead.
      */
+    @Deprecated("use simpleEncryptKvs", ReplaceWith("simpleEncryptKvs(name, key)"))
     fun encryptKvs(name: String, key: String): Kvs {
+        return simpleEncryptKvs(name, key)
+    }
+
+    /**
+     * Creates or retrieves a named, encrypted [Kvs] instance without TTL support.
+     *
+     * This function provides an encrypted implementation of the [Kvs] interface,
+     * backed by DataStore. Data is encrypted before storage and decrypted on retrieval.
+     * Keys stored in this instance will not expire.
+     *
+     * @param name The unique name for the encrypted KVS instance. This name is often
+     *             used as the filename for the underlying DataStore.
+     * @param key The encryption key used to secure the data. It is crucial
+     *            to manage this key securely.
+     * @return An encrypted [Kvs] instance associated with the given [name] and [key].
+     *
+     * @sample
+     * ```
+     * val secureKvs = Storage.simpleEncryptKvs("secure_prefs", "my_secret_key")
+     * secureKvs.edit().putString("sensitive", "data").commit()
+     * ```
+     */
+    fun simpleEncryptKvs(name: String, key: String): Kvs {
         return encryptKvs(
             name = name,
             encryptor = encryptor(
@@ -82,17 +193,24 @@ object Storage {
     }
 
     /**
-     * Creates or retrieves a named, encrypted [Kvs] instance.
+     * Creates or retrieves a named, encrypted [Kvs] instance with custom encryption.
      *
      * This function provides an implementation of the [Kvs] interface that
-     * encrypts data before storing it, typically using DataStore as the backend.
+     * encrypts data before storing it using a custom [Encryptor] implementation.
      * Each unique [name] will correspond to a distinct, encrypted DataStore file.
+     * Keys stored in this instance will not expire.
      *
      * @param name The unique name for the encrypted KVS instance. This name is often
      *             used as the filename for the underlying DataStore.
      * @param encryptor The [Encryptor] implementation to be used for data encryption
      *                  and decryption.
      * @return An encrypted [Kvs] instance associated with the given [name] and [encryptor].
+     *
+     * @sample
+     * ```
+     * val customEncryptor = MyCustomEncryptor()
+     * val kvs = Storage.encryptKvs("custom_secure", customEncryptor)
+     * ```
      */
     fun encryptKvs(name: String, encryptor: Encryptor): Kvs = DataStoreKvs(
         dataStore = DsEncryptStorage(
@@ -119,13 +237,28 @@ object Storage {
     fun inMemoryKvs(name: String): Kvs = provideInMemoryKvsInstance(name)
 
     /**
-     * Documents a class, function, or property.
+     * Creates or retrieves a named [Document] instance for single-object storage.
      *
-     * This is a placeholder function intended to be documented. It currently does nothing and serves
-     * only as an example for documentation generation.
+     * This function provides a [Document] interface for storing and retrieving a single
+     * serializable object (e.g., a user profile, configuration object). The document
+     * is stored as a single entity in DataStore.
      *
-     * @param name A string parameter, its purpose is yet to be defined.
-     * @return A string, the content of which is currently undefined.
+     * **Note:** This is different from [Kvs] which stores multiple key-value pairs.
+     * A [Document] stores a single object that can be retrieved as a whole.
+     *
+     * @param name The unique name for the Document instance. This name is often
+     *             used as the filename for the underlying DataStore.
+     * @return A [Document] instance associated with the given [name].
+     *
+     * @sample
+     * ```
+     * @Serializable
+     * data class UserProfile(val name: String, val email: String)
+     *
+     * val document = Storage.document("user_profile")
+     * document.put(UserProfile("John", "john@example.com"))
+     * val profile: UserProfile? = document.get()
+     * ```
      */
     fun document(name: String): Document {
         val dataStore = provideDocumentDataStoreInstance(name, Encryptor.None)
@@ -133,18 +266,30 @@ object Storage {
     }
 
     /**
-     * Creates or retrieves a named, encrypted [Document] instance using a custom [Encryptor].
+     * Creates or retrieves a named, encrypted [Document] instance.
      *
-     * This function provides an implementation of the [Kvs] interface that
-     * encrypts data before storing it, typically using DataStore as the backend.
-     * Each unique [name] will correspond to a distinct, encrypted DataStore file.
-     * This overload allows for providing a custom encryption and decryption logic.
+     * This function provides a [Document] interface for storing and retrieving a single
+     * serializable object with encryption. The document is encrypted before storage and
+     * decrypted on retrieval.
      *
-     * @param name The unique name for the encrypted KVS instance. This name is often
+     * **Note:** This is different from [Kvs] which stores multiple key-value pairs.
+     * A [Document] stores a single object that can be retrieved as a whole.
+     *
+     * @param name The unique name for the encrypted Document instance. This name is often
      *             used as the filename for the underlying DataStore.
-     * @param encryptor The [Encryptor] implementation to be used for data encryption
-     *                  and decryption.
-     * @return An encrypted [Document] instance associated with the given [name] and [encryptor].
+     * @param secretKey The encryption key used to secure the document data. It is crucial
+     *                  to manage this key securely.
+     * @return An encrypted [Document] instance associated with the given [name] and [secretKey].
+     *
+     * @sample
+     * ```
+     * @Serializable
+     * data class SecureData(val token: String)
+     *
+     * val document = Storage.encryptDocument("secure_data", "my_secret_key")
+     * document.put(SecureData("sensitive_token"))
+     * val data: SecureData? = document.get()
+     * ```
      */
     fun encryptDocument(name: String, secretKey: String): Document {
         val dataStore = provideDocumentDataStoreInstance(

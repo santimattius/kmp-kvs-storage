@@ -3,6 +3,7 @@ package com.santimattius.kvs
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.santimattius.kvs.internal.ttl.Ttl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import java.util.UUID
+import kotlin.time.Duration.Companion.hours
 
 class MainViewModel : ViewModel() {
 
@@ -46,6 +48,7 @@ class MainViewModel : ViewModel() {
         job = viewModelScope.launch(Dispatchers.IO) {
             Log.d("MainViewModel", "read: ${kvs.getString("token", "error")}")
             updateDocument()
+            tempKey(UUID.randomUUID().toString())
         }
     }
 
@@ -79,6 +82,21 @@ class MainViewModel : ViewModel() {
             document.put(userProfile)
             val result: Profile? = document.get()
             Log.d("MainViewModel", "updateDocument: $result")
+        }
+    }
+
+    fun tempKey(token: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            //ttl for all keys in the kvs
+            val globalTtt: Ttl = object : Ttl {
+                override fun value() = 1.hours.inWholeMilliseconds
+            }
+
+            val kvsTemp = Storage.kvs("secure", ttl = globalTtt, encrypted = true)
+            kvsTemp.edit()
+                .putString("name", "Santiago") // without TTL
+                .putString(key = "token", value = token, duration = 1.hours) // with TTL
+                .commit()
         }
     }
 
