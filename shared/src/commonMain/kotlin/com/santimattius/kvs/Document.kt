@@ -25,7 +25,9 @@ interface Document {
 @OptIn(ExperimentalObjCRefinement::class)
 @HiddenFromObjC
 suspend inline fun <reified T> Document.get(): T? {
-    return Json.decodeFromString<T>(read())
+    val content = read()
+    if (content.isBlank()) return null
+    return Json.decodeFromString<T>(content)
 }
 
 @OptIn(ExperimentalObjCRefinement::class)

@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.map
 
 internal class DsStorage(
@@ -61,6 +62,8 @@ internal class DsStorage(
                 defaultValue = defaultValue,
                 converter = converter
             )
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             println("Error: $e") //TODO: logger
             defaultValue

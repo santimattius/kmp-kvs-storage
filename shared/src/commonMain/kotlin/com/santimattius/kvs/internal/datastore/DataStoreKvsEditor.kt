@@ -3,6 +3,7 @@ package com.santimattius.kvs.internal.datastore
 import com.santimattius.kvs.Kvs
 import com.santimattius.kvs.internal.datastore.storage.Storage
 import com.santimattius.kvs.internal.exception.WriteKvsException
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -133,6 +134,8 @@ internal class DataStoreKvsEditor(
                 this.addValues.clear()
                 this.removeValues.clear()
                 this.clearOperation = false
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Throwable) {
                 throw WriteKvsException(message = "Error writing to storage", e)
             } finally {
