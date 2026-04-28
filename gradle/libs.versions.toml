@@ -1,9 +1,9 @@
 [versions]
-agp = "8.12.2"
-kotlin = "2.3.0"
+agp = "9.1.0"
+kotlin = "2.3.10"
 kotlinStdlib = "2.3.0"
 kotlinxCollectionsImmutable = "0.4.0"
-skie = "0.10.9"
+skie = "0.10.10"
 swiftklib = "0.6.4"
 mavenPublish = "0.36.0"
 
@@ -11,15 +11,15 @@ android-compileSdk = "36"
 android-minSdk = "24"
 android-targetSdk = "36"
 
-composeBom = "2026.01.00"
+composeBom = "2026.03.00"
 androidx-lifecycle = "2.10.0"
 
-androidx-activity = "1.12.2"
+androidx-activity = "1.13.0"
 androidx-appcompat = "1.7.1"
-androidx-core = "1.17.0"
+androidx-core = "1.18.0"
 
 startupRuntime = "1.2.0"
-datastore = "1.2.0"
+datastore = "1.2.1"
 kotlinxCoroutines = "1.10.2"
 kotlinxSerialization = "1.10.0"
 

@@ -10,6 +10,7 @@ import com.santimattius.kvs.internal.datastore.storage.Storage
 import com.santimattius.kvs.internal.datastore.storage.StorageOperation
 import com.santimattius.kvs.internal.exception.ReadKvsException
 import com.santimattius.kvs.internal.logger.KvsLogger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -81,6 +82,8 @@ internal class DsEncryptStorage(
                     converter(encryptor.decrypt(it))
                 }
             )
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Throwable) {
             logger.error("Error reading preference", e)
             throw ReadKvsException("Error reading preference", e)
