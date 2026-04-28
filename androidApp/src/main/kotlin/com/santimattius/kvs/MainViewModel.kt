@@ -18,7 +18,7 @@ import kotlin.time.Duration.Companion.hours
 
 class MainViewModel : ViewModel() {
 
-    private val kvs = Storage.encryptKvs("user_preferences", "secret")
+    private val kvs = Storage.simpleEncryptKvs("user_preferences", "secret")
     private val inMemoryKvs = Storage.inMemoryKvs("user_preferences")
 
     private val _isDarkModeEnabled = MutableStateFlow(false)

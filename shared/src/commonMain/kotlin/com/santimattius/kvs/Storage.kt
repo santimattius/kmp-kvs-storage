@@ -31,12 +31,13 @@ object Storage {
     /**
      * Enables or disables debug logging for KVS operations.
      *
-     * When debug mode is enabled, KVS operations may produce additional logging output,
-     * which can be helpful for troubleshooting and understanding the internal workings
-     * of the storage system.
-     *
      * @param isDebug `true` to enable debug logging, `false` to disable it.
+     * @deprecated Migrate to `io.github.santimattius:kvs-core`. The same method exists on `Storage` there.
      */
+    @Deprecated(
+        "Migrate to io.github.santimattius:kvs-core. The same Storage.debug(isDebug) method is available there.",
+        ReplaceWith("debug(isDebug)")
+    )
     fun debug(isDebug: Boolean) {
         this.isDebug = isDebug
     }
@@ -76,6 +77,10 @@ object Storage {
      * kvs.edit().putString("key", "value").commit()
      * ```
      */
+    @Deprecated(
+        "Migrate to io.github.santimattius:kvs-persistence-light. Use Storage.simpleKvs(name) from that artifact.",
+        ReplaceWith("simpleKvs(name)", "com.santimattius.kvs.simpleKvs")
+    )
     fun simpleKvs(name: String): Kvs = DataStoreKvs(
         dataStore = DsStorage(
             dataStore = provideDataStoreInstance(name),
@@ -129,6 +134,10 @@ object Storage {
      * val secureCache = Storage.kvs("secure", ttl = ttl, encrypted = true)
      * ```
      */
+    @Deprecated(
+        "Migrate to io.github.santimattius:kvs-persistence-light. Use Storage.kvs(name, ttl, encrypted) from that artifact.",
+        ReplaceWith("kvs(name, ttl, encrypted)", "com.santimattius.kvs.kvs")
+    )
     @ExperimentalKvsTtl
     fun kvs(name: String, ttl: Ttl? = null, encrypted: Boolean = false): KvsExtended =
         TtlKvsExtended(
@@ -182,6 +191,10 @@ object Storage {
      * secureKvs.edit().putString("sensitive", "data").commit()
      * ```
      */
+    @Deprecated(
+        "Migrate to io.github.santimattius:kvs-persistence-light. Use Storage.simpleEncryptKvs(name, key) from that artifact.",
+        ReplaceWith("simpleEncryptKvs(name, key)", "com.santimattius.kvs.simpleEncryptKvs")
+    )
     fun simpleEncryptKvs(name: String, key: String): Kvs {
         return encryptKvs(
             name = name,
@@ -212,6 +225,10 @@ object Storage {
      * val kvs = Storage.encryptKvs("custom_secure", customEncryptor)
      * ```
      */
+    @Deprecated(
+        "Migrate to io.github.santimattius:kvs-persistence-light. Use Storage.encryptKvs(name, encryptor) from that artifact.",
+        ReplaceWith("encryptKvs(name, encryptor)", "com.santimattius.kvs.encryptKvs")
+    )
     fun encryptKvs(name: String, encryptor: Encryptor): Kvs = DataStoreKvs(
         dataStore = DsEncryptStorage(
             dataStore = provideDataStoreInstance(name),
@@ -234,6 +251,10 @@ object Storage {
      * @param name The unique name for the in-memory KVS instance.
      * @return An in-memory [Kvs] instance associated with the given [name].
      */
+    @Deprecated(
+        "Migrate to io.github.santimattius:kvs-core. The same Storage.inMemoryKvs(name) method is available there.",
+        ReplaceWith("inMemoryKvs(name)")
+    )
     fun inMemoryKvs(name: String): Kvs = provideInMemoryKvsInstance(name)
 
     /**
@@ -260,6 +281,10 @@ object Storage {
      * val profile: UserProfile? = document.get()
      * ```
      */
+    @Deprecated(
+        "Migrate to io.github.santimattius:kvs-persistence-light. Use Storage.document(name) from that artifact.",
+        ReplaceWith("document(name)", "com.santimattius.kvs.document")
+    )
     fun document(name: String): Document {
         val dataStore = provideDocumentDataStoreInstance(name, Encryptor.None)
         return DataStoreDocument(dataStore)
@@ -291,6 +316,10 @@ object Storage {
      * val data: SecureData? = document.get()
      * ```
      */
+    @Deprecated(
+        "Migrate to io.github.santimattius:kvs-persistence-light. Use Storage.encryptDocument(name, secretKey) from that artifact.",
+        ReplaceWith("encryptDocument(name, secretKey)", "com.santimattius.kvs.encryptDocument")
+    )
     fun encryptDocument(name: String, secretKey: String): Document {
         val dataStore = provideDocumentDataStoreInstance(
             name = name,

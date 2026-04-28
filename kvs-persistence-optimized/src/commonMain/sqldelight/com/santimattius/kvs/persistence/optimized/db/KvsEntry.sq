@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS KvsEntry (
+  key TEXT NOT NULL PRIMARY KEY,
+  value TEXT NOT NULL,
+  expires_at INTEGER
+);
+
+selectByKey:
+SELECT * FROM KvsEntry WHERE key = ?;
+
+selectAll:
+SELECT * FROM KvsEntry;
+
+upsert:
+INSERT OR REPLACE INTO KvsEntry(key, value, expires_at) VALUES (?, ?, ?);
+
+deleteByKey:
+DELETE FROM KvsEntry WHERE key = ?;
+
+deleteAll:
+DELETE FROM KvsEntry;
+
+deleteExpired:
+DELETE FROM KvsEntry WHERE expires_at IS NOT NULL AND expires_at <= ?;
