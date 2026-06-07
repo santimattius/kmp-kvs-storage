@@ -1,6 +1,8 @@
 
 # KvsStorage
 
+> **2.0 breaking change (in development on `feature/2.0.0`):** the monolithic `kvs` artifact is being split into `kvs-core`, `kvs-persistence-light`, `kvs-document`, and `kvs-persistence-optimized`. See [MIGRATION.md](MIGRATION.md) for upgrade guidance. The `kvs` artifact (`1.3.0-deprecated`) remains available during the transition.
+
 ## Overview
 
 KvsStorage is a Kotlin Multiplatform library that provides a simple, type-safe key-value storage solution. It's designed to work across multiple platforms including Android, iOS, and other Kotlin Multiplatform targets.

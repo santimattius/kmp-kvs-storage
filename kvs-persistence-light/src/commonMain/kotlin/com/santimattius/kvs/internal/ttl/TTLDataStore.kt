@@ -5,7 +5,7 @@ import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioSerializer
 import androidx.datastore.core.okio.OkioStorage
 import com.santimattius.kvs.internal.datastore.encrypt.Encryptor
-import com.santimattius.kvs.internal.document.platformFileSystem
+import com.santimattius.kvs.internal.io.platformFileSystem
 import com.santimattius.kvs.internal.producePath
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO

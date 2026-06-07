@@ -38,11 +38,18 @@ kotlin {
             api(projects.kvsCore)
             implementation(projects.kvsPersistenceLight)
             implementation(libs.kotlin.stdlib)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.androidx.datastore)
+            implementation(libs.kotlinx.collections.immutable)
             implementation(libs.kotlinx.serialization.json)
+        }
+        androidMain.dependencies {
+            implementation(libs.kotlinx.coroutines.android)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.androidx.datastore)
         }
     }
 }

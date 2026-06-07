@@ -19,17 +19,17 @@ implementation("io.github.santimattius:kvs:1.3.x")
 // Minimum — in-memory KVS only (no disk persistence)
 implementation("io.github.santimattius:kvs-core:2.0.0")
 
-// DataStore-backed KVS, encrypted KVS, TTL, Document storage
+// Light persistence: KVS, encrypted KVS, TTL
 implementation("io.github.santimattius:kvs-persistence-light:2.0.0")
 
-// Typed JSON serialization for Document (Document.get<T> / Document.put<T>)
+// Single-document storage + typed JSON serialization (Document.get<T> / Document.put<T>)
 implementation("io.github.santimattius:kvs-document:2.0.0")
 
-// SQLite-backed KVS with efficient TTL for large datasets
+// Optimized persistence: large datasets, efficient TTL
 implementation("io.github.santimattius:kvs-persistence-optimized:2.0.0")
 ```
 
-Typical combination for existing 1.x users who used DataStore:
+Typical combination for existing 1.x users who used the monolithic `kvs` artifact with disk persistence:
 
 ```kotlin
 implementation("io.github.santimattius:kvs-core:2.0.0")
@@ -53,7 +53,7 @@ val kvs = Storage.inMemoryKvs("name")
 val kvs = Storage.inMemoryKvs("name")
 ```
 
-### DataStore-backed KVS (no TTL)
+### Persistent KVS — light backend (no TTL)
 
 Requires `kvs-core` + `kvs-persistence-light`.
 
@@ -95,7 +95,7 @@ val cache: KvsExtended = Storage.kvs("cache", ttl = 1.hours)
 
 ### Document storage
 
-Requires `kvs-core` + `kvs-persistence-light`.
+Requires `kvs-core` + `kvs-persistence-light` + `kvs-document`.
 
 ```kotlin
 // 1.x
@@ -124,7 +124,7 @@ val profile: UserProfile? = doc.get()
 
 ### High-throughput / large-dataset KVS (new in 2.0)
 
-Requires `kvs-core` + `kvs-persistence-optimized`. Uses SQLite instead of DataStore.
+Requires `kvs-core` + `kvs-persistence-optimized`.
 
 ```kotlin
 // Simple
@@ -155,9 +155,9 @@ The `io.github.santimattius:kvs` artifact (the old `shared` module) is deprecate
 
 ---
 
-## 5. No DataStore / SQLDelight knowledge required
+## 5. Choose modules by use case, not by implementation
 
-2.0 does not expose DataStore, Room, or SQLDelight in its public API. Choose modules based on your use case, not by the underlying technology:
+2.0 does not expose persistence technologies in its public API. Choose modules based on your use case:
 
 | Need | Module |
 |------|--------|

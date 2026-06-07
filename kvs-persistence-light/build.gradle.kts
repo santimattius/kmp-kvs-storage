@@ -67,8 +67,7 @@ kotlin {
 
 swiftklib {
     create("KtCrypto") {
-        // TODO Phase 3: move to kvs-persistence-light/native/KtCrypto
-        path = file("../shared/native/KtCrypto")
+        path = file("native/KtCrypto")
         packageName("com.santimattius.kvs.native")
     }
 }

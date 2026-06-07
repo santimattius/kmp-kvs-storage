@@ -2,4 +2,4 @@ package com.santimattius.kvs.internal.document
 
 import okio.FileSystem
 
-actual fun platformFileSystem(): FileSystem = FileSystem.SYSTEM
+internal expect fun platformFileSystem(): FileSystem

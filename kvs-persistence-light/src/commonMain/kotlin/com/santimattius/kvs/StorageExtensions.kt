@@ -6,8 +6,6 @@ import com.santimattius.kvs.internal.datastore.encrypt.DsEncryptStorage
 import com.santimattius.kvs.internal.datastore.encrypt.Encryptor
 import com.santimattius.kvs.internal.datastore.encrypt.encryptor
 import com.santimattius.kvs.internal.datastore.storage.DsStorage
-import com.santimattius.kvs.internal.document.DataStoreDocument
-import com.santimattius.kvs.internal.document.provideDocumentDataStoreInstance
 import com.santimattius.kvs.internal.logger.NoopKvsLogger
 import com.santimattius.kvs.internal.logger.logger
 import com.santimattius.kvs.internal.provideDataStoreInstance
@@ -60,9 +58,3 @@ fun Storage.kvs(name: String, ttl: Duration? = null, encrypted: Boolean = false)
         ),
         ttlManager = TtlManager(defaultTtl = ttl)
     )
-
-fun Storage.document(name: String): Document =
-    DataStoreDocument(provideDocumentDataStoreInstance(name, Encryptor.None))
-
-fun Storage.encryptDocument(name: String, secretKey: String): Document =
-    DataStoreDocument(provideDocumentDataStoreInstance(name, encryptor(key = secretKey, logger = logger())))
