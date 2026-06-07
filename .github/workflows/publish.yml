@@ -27,6 +27,14 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           gradle-home-cache-cleanup: true
+      - name: Run tests
+        run: |
+          ./gradlew \
+            :kvs-core:allTests \
+            :kvs-persistence-light:allTests \
+            :kvs-document:allTests \
+            :kvs-persistence-optimized:allTests \
+            --no-daemon
       - name: Extract version from branch name
         id: version
         run: |
@@ -139,7 +147,15 @@ jobs:
           files: |
             ./release/KvsStorage-${{ steps.version.outputs.version }}.xcframework.zip
       - name: Publish to MavenCentral
-        run: ./gradlew publishToMavenCentral --no-configuration-cache
+        run: |
+          ./gradlew publishToMavenCentral \
+            :kvs-core:publish \
+            :kvs-persistence-light:publish \
+            :kvs-document:publish \
+            :kvs-persistence-optimized:publish \
+            :kvs-bom:publish \
+            :shared:publish \
+            --no-configuration-cache
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}

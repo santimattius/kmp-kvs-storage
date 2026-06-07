@@ -59,12 +59,10 @@ Requires `kvs-core` + `kvs-persistence-light`.
 
 ```kotlin
 // 1.x
-val kvs = Storage.simpleKvs("preferences")
-// or the old alias:
 val kvs = Storage.kvs("preferences")
 
-// 2.0 (identical call, now an extension from kvs-persistence-light)
-val kvs = Storage.simpleKvs("preferences")
+// 2.0 — canonical API
+val kvs = Storage.kvsLight("preferences")
 ```
 
 ### Encrypted KVS
@@ -73,10 +71,10 @@ Requires `kvs-core` + `kvs-persistence-light`.
 
 ```kotlin
 // 1.x
-val kvs = Storage.simpleEncryptKvs("secure", "my-secret-key")
+val kvs = Storage.encryptKvs("secure", "my-secret-key")
 
-// 2.0 (identical call)
-val kvs = Storage.simpleEncryptKvs("secure", "my-secret-key")
+// 2.0 — canonical API
+val kvs = Storage.kvsLightEncrypt("secure", "my-secret-key")
 ```
 
 ### KVS with TTL
@@ -88,9 +86,9 @@ Requires `kvs-core` + `kvs-persistence-light`.
 @OptIn(ExperimentalKvsTtl::class)
 val cache: KvsExtended = Storage.kvs("cache", ttl = 1.hours)
 
-// 2.0 (identical call)
+// 2.0 — canonical API
 @OptIn(ExperimentalKvsTtl::class)
-val cache: KvsExtended = Storage.kvs("cache", ttl = 1.hours)
+val cache: KvsExtended = Storage.kvsLight("cache", ttl = 1.hours)
 ```
 
 ### Document storage
@@ -128,11 +126,11 @@ Requires `kvs-core` + `kvs-persistence-optimized`.
 
 ```kotlin
 // Simple
-val kvs: Kvs = Storage.optimizedKvs("large-cache")
+val kvs: Kvs = Storage.kvsOptimized("large-cache")
 
 // With TTL
 @OptIn(ExperimentalKvsTtl::class)
-val cache: KvsExtended = Storage.optimizedKvs("large-cache", ttl = 24.hours)
+val cache: KvsExtended = Storage.kvsOptimized("large-cache", ttl = 24.hours)
 ```
 
 ---
@@ -149,9 +147,13 @@ Storage.debug(true)
 
 ---
 
-## 4. Deprecated 1.x artifact
+## 4. Aggregator vs individual artifacts
 
-The `io.github.santimattius:kvs` artifact (the old `shared` module) is deprecated as of version `1.3.0-deprecated`. It continues to compile but every method emits a deprecation warning pointing to the 2.0 equivalent. It will be removed in a future release.
+In 2.0, `io.github.santimattius:kvs:2.0.0` is a **convenience aggregator** that pulls in all modules. It replaces the old monolithic implementation but does not duplicate source code.
+
+For smaller binaries, depend on individual artifacts (`kvs-core`, `kvs-persistence-light`, etc.) instead of the aggregator.
+
+The 1.x monolith (`kvs:1.x`) is no longer maintained. Use the migration steps above to move to 2.0.
 
 ---
 
@@ -165,3 +167,32 @@ The `io.github.santimattius:kvs` artifact (the old `shared` module) is deprecate
 | Typical app storage (small–medium data) | `kvs-core` + `kvs-persistence-light` |
 | Document / object storage | + `kvs-document` |
 | High-throughput / large-dataset / efficient TTL | `kvs-core` + `kvs-persistence-optimized` |
+
+---
+
+## 6. BOM (optional)
+
+To align versions without repeating `2.0.0` on every line:
+
+```kotlin
+implementation(platform("io.github.santimattius:kvs-bom:2.0.0"))
+implementation("io.github.santimattius:kvs-core")
+implementation("io.github.santimattius:kvs-persistence-light")
+```
+
+The BOM is optional. Projects that prioritize a small dependency footprint should keep explicit versions and include only the artifacts they need.
+
+---
+
+## 7. Choosing light vs optimized backend
+
+2.0 uses **explicit factory methods** (Option C). There is no automatic backend resolution when both artifacts are on the classpath.
+
+| Backend | Factory methods | Artifact |
+|---------|-----------------|----------|
+| Light | `Storage.kvsLight(...)`, `Storage.kvsLightEncrypt(...)` | `kvs-persistence-light` |
+| Optimized | `Storage.kvsOptimized(...)` | `kvs-persistence-optimized` |
+
+**Both backends on classpath:** call the method that matches the backend you intend. For example, use `kvsLight` for app preferences and `kvsOptimized` for a large TTL cache in the same project.
+
+Deprecated aliases (`simpleKvs`, `optimizedKvs`, `kvs(name)` without TTL) remain available but will be removed in a future release.
