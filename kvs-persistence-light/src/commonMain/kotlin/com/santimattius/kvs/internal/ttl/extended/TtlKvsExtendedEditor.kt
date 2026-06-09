@@ -6,6 +6,7 @@ import com.santimattius.kvs.KvsExtended
 import com.santimattius.kvs.internal.ttl.TTLEntity
 import com.santimattius.kvs.internal.ttl.TtlManager
 import com.santimattius.kvs.internal.exception.WriteKvsException
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -110,6 +111,8 @@ internal class TtlKvsExtendedEditor(
                 addValues.clear()
                 removeValues.clear()
                 clearOperation = false
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Throwable) {
                 throw WriteKvsException(message = "Error writing to storage", e)
             } finally {
