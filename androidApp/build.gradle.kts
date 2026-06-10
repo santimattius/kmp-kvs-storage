@@ -37,7 +37,9 @@ android {
 }
 
 dependencies {
-    implementation(projects.shared)
+    implementation(projects.kvsCore)
+    implementation(projects.kvsPersistenceLight)
+    implementation(projects.kvsDocument)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
 

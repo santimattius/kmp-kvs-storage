@@ -1,6 +1,56 @@
 
 # KvsStorage
 
+> **2.0.0 breaking change:** the library is split into focused modules. See [MIGRATION.md](MIGRATION.md) and [CHANGELOG.md](CHANGELOG.md). The `kvs` artifact is now a convenience aggregator; prefer individual modules for smaller binaries.
+
+## 2.0 modules
+
+Pick only the artifacts you need:
+
+| Artifact | When to use |
+|----------|-------------|
+| `kvs-core` | In-memory KVS only (`Storage.inMemoryKvs`) — tests, caches, no disk |
+| `kvs-persistence-light` | Light persistence — small to medium key counts, low overhead |
+| `kvs-document` | Single-document storage + typed JSON (`Document.get` / `Document.put`) |
+| `kvs-persistence-optimized` | Optimized persistence — large datasets, efficient TTL cleanup |
+| `kvs-bom` | (Optional) Version alignment for all artifacts above |
+
+```kotlin
+// build.gradle.kts — typical app
+implementation("io.github.santimattius:kvs-core:2.0.0")
+implementation("io.github.santimattius:kvs-persistence-light:2.0.0")
+implementation("io.github.santimattius:kvs-document:2.0.0") // if you use Document
+
+// Or use the all-in-one aggregator (not recommended for size-sensitive apps):
+// implementation("io.github.santimattius:kvs:2.0.0")
+```
+
+### BOM (optional — version alignment)
+
+The BOM is **optional**. Use it when you want every KvsStorage artifact on the same version without repeating the version number. If you care about binary size, skip the BOM and declare only the artifacts you need with an explicit version (see table above).
+
+```kotlin
+dependencies {
+    implementation(platform("io.github.santimattius:kvs-bom:2.0.0"))
+
+    implementation("io.github.santimattius:kvs-core")
+    implementation("io.github.santimattius:kvs-persistence-light")
+    implementation("io.github.santimattius:kvs-document") // only if needed
+}
+```
+
+The BOM pins versions for `kvs-core`, `kvs-persistence-light`, `kvs-persistence-optimized`, `kvs-document`, and the `kvs` aggregator. It adds no runtime dependencies.
+
+### Backend selection (light vs optimized)
+
+Use **explicit factory methods** — no automatic resolution when both backends are present:
+
+```kotlin
+val prefs = Storage.kvsLight("user_prefs")
+val secure = Storage.kvsLightEncrypt("tokens", secretKey)
+val cache = Storage.kvsOptimized("large-cache")  // requires kvs-persistence-optimized
+```
+
 ## Overview
 
 KvsStorage is a Kotlin Multiplatform library that provides a simple, type-safe key-value storage solution. It's designed to work across multiple platforms including Android, iOS, and other Kotlin Multiplatform targets.

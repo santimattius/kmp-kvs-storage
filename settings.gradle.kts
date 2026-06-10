@@ -30,3 +30,8 @@ dependencyResolutionManagement {
 
 include(":androidApp")
 include(":shared")
+include(":kvs-core")
+include(":kvs-persistence-light")
+include(":kvs-document")
+include(":kvs-persistence-optimized")
+include(":kvs-bom")

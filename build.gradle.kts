@@ -10,4 +10,5 @@ plugins {
     alias(libs.plugins.skie) apply false
     alias(libs.plugins.swiftklib) apply false
     alias(libs.plugins.mavenPublish) apply false
+    alias(libs.plugins.sqldelight) apply false
 }
