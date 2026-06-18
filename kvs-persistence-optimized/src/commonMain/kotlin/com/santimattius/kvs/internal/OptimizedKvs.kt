@@ -6,6 +6,7 @@ import app.cash.sqldelight.coroutines.mapToOneOrNull
 import com.santimattius.kvs.Kvs
 import com.santimattius.kvs.internal.exception.WriteKvsException
 import com.santimattius.kvs.persistence.optimized.db.KvsEntryQueries
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -107,6 +108,7 @@ private class OptimizedKvsEditor(private val queries: KvsEntryQueries) : Kvs.Kvs
                 }
             }
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
             throw WriteKvsException(e.message ?: "commit failed", e)
         }
     }

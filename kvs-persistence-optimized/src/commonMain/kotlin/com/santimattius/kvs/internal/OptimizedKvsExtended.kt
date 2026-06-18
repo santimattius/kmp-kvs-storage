@@ -11,6 +11,7 @@ import com.santimattius.kvs.internal.ttl.CleanupJob
 import com.santimattius.kvs.internal.ttl.TtlManager
 import com.santimattius.kvs.persistence.optimized.db.KvsEntry
 import com.santimattius.kvs.persistence.optimized.db.KvsEntryQueries
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -137,6 +138,7 @@ private class OptimizedKvsExtendedEditor(
                 }
             }
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
             throw WriteKvsException(e.message ?: "commit failed", e)
         }
     }

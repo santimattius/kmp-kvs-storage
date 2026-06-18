@@ -4,13 +4,18 @@ import androidx.datastore.core.DataStore
 import com.santimattius.kvs.internal.KvsStream
 import com.santimattius.kvs.internal.ttl.TTLEntity
 import com.santimattius.kvs.internal.ttl.TtlManager
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
 internal class TtlKvsExtendedStream(
     private val ds: DataStore<Map<String, TTLEntity>>,
-    private val ttlManager: TtlManager = TtlManager()
+    private val ttlManager: TtlManager = TtlManager(),
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : KvsStream {
 
     override fun getAllAsStream(): Flow<Map<String, Any>> =
@@ -18,7 +23,7 @@ internal class TtlKvsExtendedStream(
             buildMap {
                 for ((k, entity) in allValues) if (!isExpired(entity)) put(k, entity.value)
             }
-        }.distinctUntilChanged()
+        }.distinctUntilChanged().flowOn(dispatcher)
 
     override fun getStringAsStream(key: String, defValue: String): Flow<String> =
         getOrDefault(key, defValue, String::toString)
@@ -48,5 +53,5 @@ internal class TtlKvsExtendedStream(
                 isExpired(entity) -> defValue
                 else -> convert(entity.value) ?: defValue
             }
-        }.distinctUntilChanged()
+        }.distinctUntilChanged().flowOn(dispatcher)
 }

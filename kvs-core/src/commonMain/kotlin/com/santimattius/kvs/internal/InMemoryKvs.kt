@@ -4,26 +4,23 @@ import com.santimattius.kvs.Kvs
 import com.santimattius.kvs.internal.memory.InMemoryKvsStandard
 import com.santimattius.kvs.internal.memory.InMemoryKvsStream
 import com.santimattius.kvs.internal.memory.InMemoryPreferences
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.internal.SynchronizedObject
-import kotlinx.coroutines.internal.synchronized
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
-@OptIn(InternalCoroutinesApi::class, ExperimentalAtomicApi::class)
 internal class InMemoryKvs(
     internal val preferences: InMemoryPreferences,
-    private val lock: SynchronizedObject
+    private val mutex: Mutex
 ) : Kvs,
-    KvsStandard by InMemoryKvsStandard(preferences, lock),
+    KvsStandard by InMemoryKvsStandard(preferences, mutex),
     KvsStream by InMemoryKvsStream(preferences) {
 
     override fun edit(): Kvs.KvsEditor = InMemoryKvsEditor(this)
 
     override suspend operator fun contains(key: String): Boolean =
-        synchronized(lock) { preferences.contains(key) }
+        mutex.withLock { preferences.contains(key) }
 
     internal fun commitEditor(editorData: Map<String, Any?>) =
-        synchronized(lock) { preferences.commitEditor(editorData) }
+        preferences.commitEditor(editorData)
 
     internal class InMemoryKvsEditor(private val kvs: InMemoryKvs) : Kvs.KvsEditor {
         private val editorData: MutableMap<String, Any?> = mutableMapOf()
