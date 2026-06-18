@@ -64,21 +64,24 @@ The library offers:
 ## Setup
 
 ### Prerequisites
-- Kotlin 2.2.10 or higher
-- Gradle 8.13.0 or higher
-- Android Gradle Plugin 8.12.2 or higher (for Android projects)
+- Kotlin 2.3.10 or higher
+- Gradle 9.4.0 or higher
+- Android Gradle Plugin 9.1.0 or higher (for Android projects)
 
 ### Installation
 
 Add the following to your shared module's `build.gradle.kts`:
 
 ```kotlin
-val kvsVersion = "1.0.0" // Check for the latest version
+val kvsVersion = "2.0.0" // Check for the latest version
 
-sourceSets {
-    val commonMain by getting {
-        dependencies {
-            implementation("io.github.santimattius:kvs:$kvsVersion")
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation("io.github.santimattius:kvs-core:$kvsVersion")
+            implementation("io.github.santimattius:kvs-persistence-light:$kvsVersion")
+            // implementation("io.github.santimattius:kvs-persistence-optimized:$kvsVersion") // large datasets / TTL
+            // implementation("io.github.santimattius:kvs-document:$kvsVersion") // single-document storage
         }
     }
 }
@@ -91,13 +94,13 @@ sourceSets {
 #### Android
 ```kotlin
 // In your Application class or dependency injection module
-private val kvs = Storage.kvs("user_preferences")
+private val kvs = Storage.kvsLight("user_preferences")
 ```
 
 #### iOS (Swift)
 ```swift
 // In your AppDelegate or dependency injection setup
-private let kvs = Storage.shared.kvs(name: "user_preferences")
+private let kvs = Storage.shared.kvsLight(name: "user_preferences")
 ```
 
 #### Encrypted Storage
@@ -107,13 +110,13 @@ You can also initialize an encrypted KVS on each platform:
 ##### Android
 ```kotlin
 // In your Application class or dependency injection module
-private val kvs = Storage.encryptKvs(name = "user_preferences", key = "secret")
+private val kvs = Storage.kvsLightEncrypt(name = "user_preferences", secretKey = "secret")
 ```
 
 ##### iOS (Swift)
 ```swift
 // In your AppDelegate or dependency injection setup
-private let kvs = Storage.shared.encryptKvs(name: "user_pref", key: "secret")
+private let kvs = Storage.shared.kvsLightEncrypt(name: "user_pref", secretKey: "secret")
 ```
 
 ### Basic Operations
@@ -223,30 +226,34 @@ fun `test kvs operations`() = runTest {
 Storage with TTL allows keys to expire after a duration. You can set a default TTL for the instance and optionally override it per key.
 
 ```kotlin
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
+
 @OptIn(ExperimentalKvsTtl::class)
 fun createCache() {
     val ttl = object : Ttl {
-        override fun value() = kotlin.time.Duration.ofHours(1).inWholeMilliseconds
+        override fun value() = 1.hours.inWholeMilliseconds
     }
-    val cache = Storage.kvs("cache", ttl = ttl)
+    val cache = Storage.kvsLight("cache", ttl = ttl)
 
     // Uses default TTL (1 hour)
     cache.edit().putString("key1", "value1").commit()
 
     // Override TTL for this key (30 minutes)
-    cache.edit().putString("key2", "value2", kotlin.time.Duration.ofMinutes(30)).commit()
+    cache.edit().putString("key2", "value2", 30.minutes).commit()
 
     // Expired keys return the default value; cleanup runs in batch via getAll() or CleanupJob
     val value = cache.getString("key1", "default")
 
     // Optional: background cleanup job (recommended for TTL storage)
-    cache.cleanupJob(kotlin.time.Duration.ofMinutes(10)).start(applicationScope)
+    cache.cleanupJob(10.minutes).start(applicationScope)
 }
 ```
 
 | API | Description |
 |-----|-------------|
-| `Storage.kvs(name, ttl, encrypted)` | Creates a [KvsExtended] instance with optional default TTL and encryption. |
+| `Storage.kvsLight(name, ttl, encrypted)` | Creates a [KvsExtended] instance with optional default TTL and encryption (light backend). |
+| `Storage.kvsOptimized(name, ttl)` | Creates a [KvsExtended] instance with optional default TTL (optimized backend). |
 | `KvsExtended.edit().putString(key, value, duration)` | Overloads with `duration` set per-key TTL. |
 | `KvsExtended.cleanupJob(interval)` | Returns a job that periodically removes expired keys on a background dispatcher. |
 
@@ -338,7 +345,7 @@ Task {
 The library provides helper functions that wrap reads and edits into platform-native `Result` types to simplify error handling.
 
 #### Android (Kotlin Result)
-Available functions in `shared/src/commonMain/kotlin/com/santimattius/kvs/KvsExtensions.kt`:
+Available functions in `kvs-core/src/commonMain/kotlin/com/santimattius/kvs/KvsExtensions.kt`:
 
 - `suspend fun Kvs.getStringAsResult(key: String, defValue: String): Result<String>`
 - `suspend fun Kvs.getIntAsResult(key: String, defValue: Int): Result<Int>`
@@ -422,10 +429,11 @@ Note: `getAllAsResult()` is currently available in the Kotlin extensions. An equ
 ## Platform-Specific Notes
 
 ### Android & iOS
-- Both platforms use `DataStore` under the hood for modern, type-safe storage
+- `kvs-persistence-light`: uses `DataStore` for persistence on Android and iOS — ideal for small to medium key counts
+- `kvs-persistence-optimized`: uses `SQLDelight` for persistence on Android and iOS — designed for large datasets and efficient TTL cleanup
+- `kvs-core`: in-memory only, no disk persistence; safe for tests and caches
 - Provides a consistent API across platforms with the same behavior and guarantees
 - Handles data persistence and thread-safety automatically
-- Backed by a file on the device's internal storage
 
 ## License
 
