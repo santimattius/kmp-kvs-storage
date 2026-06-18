@@ -4,6 +4,7 @@ import com.santimattius.kvs.internal.memory.InMemoryPreferences
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.internal.SynchronizedObject
 import kotlinx.coroutines.internal.synchronized
+import kotlinx.coroutines.sync.Mutex
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
@@ -18,8 +19,8 @@ internal fun provideInMemoryKvsInstance(name: String): InMemoryKvs {
     instances.load()[name]?.let { return it }
     return synchronized(instancesLock) {
         instances.load()[name]?.let { return it }
-        val lock = SynchronizedObject()
-        val kvs = InMemoryKvs(InMemoryPreferences(lock), lock)
+        val preferencesLock = SynchronizedObject()
+        val kvs = InMemoryKvs(InMemoryPreferences(preferencesLock), Mutex())
         instances.store(instances.load() + (name to kvs))
         kvs
     }

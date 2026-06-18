@@ -6,6 +6,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.santimattius.kvs.internal.datastore.readPreference
+import com.santimattius.kvs.internal.logger.KvsLogger
+import com.santimattius.kvs.internal.logger.NoopKvsLogger
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -18,6 +20,7 @@ import kotlinx.coroutines.flow.map
 
 internal class DsStorage(
     private val dataStore: DataStore<Preferences>,
+    private val logger: KvsLogger = NoopKvsLogger,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : Storage<String> {
 
@@ -30,7 +33,7 @@ internal class DsStorage(
         return dataStore.data.map { preferences ->
             preferences.asMap().mapKeys { entry -> entry.key.name }
         }.catch { e ->
-            println("Error: $e")
+            logger.error("Error getting all preferences", e)
             emit(emptyMap())
         }.flowOn(dispatcher)
     }
@@ -59,7 +62,7 @@ internal class DsStorage(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            println("Error: $e")
+            logger.error("Error reading preference", e)
             defaultValue
         }
     }
@@ -68,7 +71,7 @@ internal class DsStorage(
         dataStore.data.map { preferences ->
             preferences.readPreference(key, defaultValue, converter)
         }.catch { e ->
-            println("Error: $e")
+            logger.error("Error reading preference", e)
             emit(defaultValue)
         }.flowOn(dispatcher)
 }
