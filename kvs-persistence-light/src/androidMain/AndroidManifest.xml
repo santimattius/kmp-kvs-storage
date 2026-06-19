@@ -10,7 +10,7 @@
             tools:ignore="UnusedAttribute"
             tools:node="merge">
             <meta-data
-                android:name="com.santimattius.kvs.internal.context.AppContextInitializer"
+                android:name="com.santimattius.kvs.android.AppContextInitializer"
                 android:value="androidx.startup" />
         </provider>
     </application>
