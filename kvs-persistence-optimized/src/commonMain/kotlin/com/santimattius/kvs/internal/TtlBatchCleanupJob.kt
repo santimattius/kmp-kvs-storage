@@ -2,6 +2,7 @@ package com.santimattius.kvs.internal
 
 import com.santimattius.kvs.internal.ttl.CleanupJob
 import com.santimattius.kvs.persistence.optimized.db.KvsEntryQueries
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -22,8 +23,10 @@ internal class TtlBatchCleanupJob(
         while (isActive) {
             try {
                 queries.deleteExpired(Clock.System.now().toEpochMilliseconds())
+            } catch (e: CancellationException) {
+                throw e
             } catch (_: Exception) {
-                // continue running on error
+                // continue running on operational error
             }
             delay(interval)
         }
