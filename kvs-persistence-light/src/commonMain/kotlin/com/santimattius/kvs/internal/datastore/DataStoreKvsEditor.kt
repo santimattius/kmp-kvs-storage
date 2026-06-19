@@ -2,7 +2,7 @@ package com.santimattius.kvs.internal.datastore
 
 import com.santimattius.kvs.Kvs
 import com.santimattius.kvs.internal.datastore.storage.Storage
-import com.santimattius.kvs.internal.exception.WriteKvsException
+import com.santimattius.kvs.WriteKvsException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers

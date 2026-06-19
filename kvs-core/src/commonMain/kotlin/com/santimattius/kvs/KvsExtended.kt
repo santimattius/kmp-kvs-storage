@@ -2,8 +2,8 @@ package com.santimattius.kvs
 
 import com.santimattius.kvs.internal.KvsStandard
 import com.santimattius.kvs.internal.KvsStream
-import com.santimattius.kvs.internal.exception.WriteKvsException
-import com.santimattius.kvs.internal.ttl.CleanupJob
+import com.santimattius.kvs.WriteKvsException
+import com.santimattius.kvs.ttl.CleanupJob
 import kotlinx.coroutines.CancellationException
 import kotlin.time.Duration
 

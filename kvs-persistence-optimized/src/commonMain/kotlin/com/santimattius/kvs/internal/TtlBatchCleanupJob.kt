@@ -1,6 +1,6 @@
 package com.santimattius.kvs.internal
 
-import com.santimattius.kvs.internal.ttl.CleanupJob
+import com.santimattius.kvs.ttl.CleanupJob
 import com.santimattius.kvs.persistence.optimized.db.KvsEntryQueries
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

@@ -6,8 +6,8 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOneOrNull
 import com.santimattius.kvs.KvsExtended
-import com.santimattius.kvs.internal.exception.WriteKvsException
-import com.santimattius.kvs.internal.ttl.CleanupJob
+import com.santimattius.kvs.WriteKvsException
+import com.santimattius.kvs.ttl.CleanupJob
 import com.santimattius.kvs.internal.ttl.TtlManager
 import com.santimattius.kvs.persistence.optimized.db.KvsEntry
 import com.santimattius.kvs.persistence.optimized.db.KvsEntryQueries

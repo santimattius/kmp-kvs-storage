@@ -5,7 +5,7 @@ import androidx.datastore.core.DataStore
 import com.santimattius.kvs.KvsExtended
 import com.santimattius.kvs.internal.KvsStandard
 import com.santimattius.kvs.internal.KvsStream
-import com.santimattius.kvs.internal.ttl.CleanupJob
+import com.santimattius.kvs.ttl.CleanupJob
 import com.santimattius.kvs.internal.ttl.TTLEntity
 import com.santimattius.kvs.internal.ttl.TtlManager
 import com.santimattius.kvs.internal.ttl.cleanup.TtlCleanupJob

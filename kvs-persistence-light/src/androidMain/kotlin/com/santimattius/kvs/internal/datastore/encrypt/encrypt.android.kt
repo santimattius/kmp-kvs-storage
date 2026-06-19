@@ -1,6 +1,7 @@
 package com.santimattius.kvs.internal.datastore.encrypt
 
 import android.util.Base64
+import com.santimattius.kvs.Encryptor
 import com.santimattius.kvs.internal.logger.KvsLogger
 
 internal actual fun encryptor(key: String, logger: KvsLogger): Encryptor = AndroidEncryptor(key, logger)

@@ -2,7 +2,7 @@ package com.santimattius.kvs
 
 import com.santimattius.kvs.internal.KvsStandard
 import com.santimattius.kvs.internal.KvsStream
-import com.santimattius.kvs.internal.exception.WriteKvsException
+import com.santimattius.kvs.WriteKvsException
 import kotlinx.coroutines.CancellationException
 
 interface Kvs : KvsStandard, KvsStream {
