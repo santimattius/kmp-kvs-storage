@@ -8,7 +8,8 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.santimattius.kvs.internal.datastore.readPreference
 import com.santimattius.kvs.internal.datastore.storage.Storage
 import com.santimattius.kvs.internal.datastore.storage.StorageOperation
-import com.santimattius.kvs.internal.exception.ReadKvsException
+import com.santimattius.kvs.Encryptor
+import com.santimattius.kvs.ReadKvsException
 import com.santimattius.kvs.internal.logger.KvsLogger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher

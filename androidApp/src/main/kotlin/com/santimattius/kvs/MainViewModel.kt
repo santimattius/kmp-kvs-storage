@@ -3,7 +3,7 @@ package com.santimattius.kvs
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.santimattius.kvs.internal.ttl.Ttl
+import com.santimattius.kvs.ttl.Ttl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow

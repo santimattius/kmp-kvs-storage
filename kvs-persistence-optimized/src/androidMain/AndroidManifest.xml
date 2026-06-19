@@ -8,7 +8,7 @@
             android:exported="false"
             tools:node="merge">
             <meta-data
-                android:name="com.santimattius.kvs.internal.OptimizedKvsInitializer"
+                android:name="com.santimattius.kvs.android.OptimizedKvsInitializer"
                 android:value="androidx.startup" />
         </provider>
     </application>

@@ -4,7 +4,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOneOrNull
 import com.santimattius.kvs.Kvs
-import com.santimattius.kvs.internal.exception.WriteKvsException
+import com.santimattius.kvs.WriteKvsException
 import com.santimattius.kvs.persistence.optimized.db.KvsEntryQueries
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher

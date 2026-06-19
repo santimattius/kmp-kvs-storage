@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Breaking changes
+
+- `KvsStandard`, `KvsStream`, and `TtlManager` are now annotated with `@InternalKvsApi`. They are cross-module implementation details and are not part of the public API. Any direct usage now requires `@OptIn(InternalKvsApi::class)` and should be considered unsupported.
+- `lightPersistencePath()` and `lightEncryptor()` in `kvs-persistence-light` are now annotated with `@InternalKvsApi`. These functions are bridges between library modules only and were never intended for external consumers. If you called them directly, migrate to the public `Storage.document()` and `Storage.encryptDocument()` APIs, or open an issue.
+- `AppContextInitializer` moved from `com.santimattius.kvs.internal.context` to `com.santimattius.kvs.android`. If you reference this class directly in your own manifest (non-standard use), update the `android:name` attribute.
+- `OptimizedKvsInitializer` moved from `com.santimattius.kvs.internal` to `com.santimattius.kvs.android`. Same note applies.
+
 ## [2.0.0] — 2026-06-07
 
 ### Breaking changes

@@ -4,7 +4,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioSerializer
 import androidx.datastore.core.okio.OkioStorage
-import com.santimattius.kvs.internal.datastore.encrypt.Encryptor
+import com.santimattius.kvs.Encryptor
+import com.santimattius.kvs.InternalKvsApi
 import com.santimattius.kvs.lightPersistencePath
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -14,6 +15,7 @@ import okio.BufferedSource
 import okio.Path.Companion.toPath
 import okio.use
 
+@OptIn(InternalKvsApi::class)
 internal fun createDocumentDataStorage(
     name: String,
     encryptor: Encryptor

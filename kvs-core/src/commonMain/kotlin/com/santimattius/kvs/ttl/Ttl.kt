@@ -1,4 +1,4 @@
-package com.santimattius.kvs.internal.ttl
+package com.santimattius.kvs.ttl
 
 import com.santimattius.kvs.ExperimentalKvsTtl
 

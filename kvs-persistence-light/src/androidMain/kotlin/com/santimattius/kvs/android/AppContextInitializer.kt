@@ -1,4 +1,4 @@
-package com.santimattius.kvs.internal.context
+package com.santimattius.kvs.android
 
 import android.content.Context
 import androidx.startup.Initializer

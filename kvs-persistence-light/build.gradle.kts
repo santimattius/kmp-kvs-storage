@@ -14,6 +14,11 @@ group = "io.github.santimattius"
 version = "2.0.0"
 
 kotlin {
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    compilerOptions {
+        freeCompilerArgs.add("-opt-in=com.santimattius.kvs.InternalKvsApi")
+    }
+
     androidLibrary {
         namespace = "io.github.santimattius.kvs.persistence.light"
         compileSdk = libs.versions.android.compileSdk.get().toInt()

@@ -1,7 +1,7 @@
 package com.santimattius.kvs.internal.ttl.cleanup
 
 import androidx.datastore.core.DataStore
-import com.santimattius.kvs.internal.ttl.CleanupJob
+import com.santimattius.kvs.ttl.CleanupJob
 import com.santimattius.kvs.internal.ttl.TTLEntity
 import com.santimattius.kvs.internal.ttl.TtlManager
 import kotlinx.coroutines.CancellationException

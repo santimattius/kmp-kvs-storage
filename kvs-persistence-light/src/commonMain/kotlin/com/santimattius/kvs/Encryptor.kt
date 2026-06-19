@@ -1,4 +1,4 @@
-package com.santimattius.kvs.internal.datastore.encrypt
+package com.santimattius.kvs
 
 interface Encryptor {
     fun encrypt(input: String): String
