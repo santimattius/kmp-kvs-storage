@@ -1,7 +1,9 @@
 package com.santimattius.kvs.internal
 
+import com.santimattius.kvs.InternalKvsApi
 import kotlinx.coroutines.flow.Flow
 
+@InternalKvsApi
 interface KvsStream {
 
     fun getAllAsStream(): Flow<Map<String, Any>>

@@ -1,10 +1,12 @@
 package com.santimattius.kvs.internal
 
-import com.santimattius.kvs.internal.exception.GetAllKvsException
-import com.santimattius.kvs.internal.exception.KvsException
-import com.santimattius.kvs.internal.exception.ReadKvsException
+import com.santimattius.kvs.GetAllKvsException
+import com.santimattius.kvs.InternalKvsApi
+import com.santimattius.kvs.KvsException
+import com.santimattius.kvs.ReadKvsException
 import kotlinx.coroutines.CancellationException
 
+@InternalKvsApi
 interface KvsStandard {
 
     @Throws(GetAllKvsException::class, KvsException::class, CancellationException::class)
