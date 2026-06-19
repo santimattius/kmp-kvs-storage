@@ -1,27 +1,27 @@
 [versions]
-agp = "9.1.0"
-kotlin = "2.3.10"
+agp = "9.1.1"
+kotlin = "2.3.21"
 kotlinStdlib = "2.3.0"
-kotlinxCollectionsImmutable = "0.4.0"
-skie = "0.10.10"
+kotlinxCollectionsImmutable = "0.5.0"
+skie = "0.10.12"
 swiftklib = "0.6.4"
 mavenPublish = "0.36.0"
 
-android-compileSdk = "36"
+android-compileSdk = "37"
 android-minSdk = "24"
-android-targetSdk = "36"
+android-targetSdk = "37"
 
-composeBom = "2026.03.00"
-androidx-lifecycle = "2.10.0"
+composeBom = "2026.06.00"
+androidx-lifecycle = "2.11.0"
 
 androidx-activity = "1.13.0"
 androidx-appcompat = "1.7.1"
-androidx-core = "1.18.0"
+androidx-core = "1.19.0"
 
 startupRuntime = "1.2.0"
 datastore = "1.2.1"
-kotlinxCoroutines = "1.10.2"
-kotlinxSerialization = "1.10.0"
+kotlinxCoroutines = "1.11.0"
+kotlinxSerialization = "1.11.0"
 sqldelight = "2.3.2"
 
 androidx-espresso = "3.7.0"
@@ -89,7 +89,6 @@ androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidKMPLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
-kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 skie = { id = "co.touchlab.skie", version.ref = "skie" }

@@ -30,6 +30,7 @@ kotlin {
         it.binaries.framework {
             baseName = "KvsPersistenceOptimized"
             isStatic = true
+            linkerOpts.add("-lsqlite3")
         }
     }
 
@@ -62,8 +63,10 @@ sqldelight {
     databases {
         create("KvsDatabase") {
             packageName.set("com.santimattius.kvs.persistence.optimized.db")
+            dialect("app.cash.sqldelight:sqlite-3-38-dialect:${libs.versions.sqldelight.get()}")
         }
     }
+    linkSqlite.set(true)
 }
 
 mavenPublishing {

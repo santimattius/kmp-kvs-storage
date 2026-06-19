@@ -41,6 +41,7 @@ kotlin {
             export(projects.kvsPersistenceLight)
             export(projects.kvsDocument)
             export(projects.kvsPersistenceOptimized)
+            linkerOpts.add("-lsqlite3")
         }
     }
 

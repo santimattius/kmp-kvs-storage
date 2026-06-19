@@ -4,6 +4,7 @@ import com.santimattius.kvs.internal.ttl.CleanupJob
 import com.santimattius.kvs.persistence.optimized.db.KvsEntryQueries
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -17,7 +18,7 @@ internal class TtlBatchCleanupJob(
     private val interval: Duration = 10.minutes
 ) : CleanupJob {
 
-    override fun start(scope: CoroutineScope): Job = scope.launch(Dispatchers.Default) {
+    override fun start(scope: CoroutineScope): Job = scope.launch(Dispatchers.IO) {
         while (isActive) {
             try {
                 queries.deleteExpired(Clock.System.now().toEpochMilliseconds())
