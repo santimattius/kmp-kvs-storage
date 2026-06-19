@@ -9,7 +9,7 @@ import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
 @OptIn(InternalCoroutinesApi::class, ExperimentalAtomicApi::class)
-class InMemoryPreferences(private val lock: SynchronizedObject) {
+internal class InMemoryPreferences(private val lock: SynchronizedObject) {
 
     private val _data: AtomicReference<Map<String, Any>> = AtomicReference(emptyMap())
     private val _stream: MutableStateFlow<Map<String, Any>> = MutableStateFlow(emptyMap())

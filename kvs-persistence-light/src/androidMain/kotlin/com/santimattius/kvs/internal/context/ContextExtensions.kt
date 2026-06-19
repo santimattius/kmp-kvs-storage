@@ -8,7 +8,7 @@ import android.app.backup.BackupAgent
 import android.content.Context
 import android.content.ContextWrapper
 
-fun Context.canLeakMemory(): Boolean = when (this) {
+internal fun Context.canLeakMemory(): Boolean = when (this) {
     is Application -> false
     is Activity, is Service, is BackupAgent -> true
     is ContextWrapper -> if (baseContext === this) true else baseContext.canLeakMemory()
@@ -23,4 +23,4 @@ internal fun injectContext(context: Context) {
     applicationContext = context
 }
 
-fun getApplicationContext(): Context = applicationContext ?: error("Context not injected!")
+internal fun getApplicationContext(): Context = applicationContext ?: error("Context not injected!")
