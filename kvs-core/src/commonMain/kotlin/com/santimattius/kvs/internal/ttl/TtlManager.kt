@@ -1,8 +1,10 @@
 package com.santimattius.kvs.internal.ttl
 
+import com.santimattius.kvs.InternalKvsApi
 import kotlin.time.Clock
 import kotlin.time.Duration
 
+@InternalKvsApi
 class TtlManager(
     val defaultTtl: Duration? = null,
     private val clock: Clock = Clock.System,

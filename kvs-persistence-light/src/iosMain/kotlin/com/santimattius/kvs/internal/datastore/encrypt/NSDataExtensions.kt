@@ -14,15 +14,15 @@ import platform.Foundation.create
 import platform.Foundation.dataUsingEncoding
 
 @Suppress("CAST_NEVER_SUCCEEDS")
-fun String.asNSData(): NSData? = (this as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+internal fun String.asNSData(): NSData? = (this as NSString).dataUsingEncoding(NSUTF8StringEncoding)
 
 @OptIn(ExperimentalForeignApi::class)
-fun NSData.convertToByteArray(): ByteArray = this.toByteString().toByteArray()
+internal fun NSData.convertToByteArray(): ByteArray = this.toByteString().toByteArray()
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
-fun ByteArray.asNSData(): NSData = this.usePinned { pinned ->
+internal fun ByteArray.asNSData(): NSData = this.usePinned { pinned ->
     NSData.create(bytes = pinned.addressOf(0), length = this.size.convert())
 }
 
 @OptIn(ExperimentalForeignApi::class)
-fun NSData.asString(): String = this.toByteString().toByteArray().decodeToString()
+internal fun NSData.asString(): String = this.toByteString().toByteArray().decodeToString()

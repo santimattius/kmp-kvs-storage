@@ -5,7 +5,7 @@ import androidx.datastore.core.DataStore
 import com.santimattius.kvs.KvsExtended
 import com.santimattius.kvs.internal.ttl.TTLEntity
 import com.santimattius.kvs.internal.ttl.TtlManager
-import com.santimattius.kvs.internal.exception.WriteKvsException
+import com.santimattius.kvs.WriteKvsException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers

@@ -1,9 +1,10 @@
 package com.santimattius.kvs.internal.ttl.cleanup
 
 import androidx.datastore.core.DataStore
-import com.santimattius.kvs.internal.ttl.CleanupJob
+import com.santimattius.kvs.ttl.CleanupJob
 import com.santimattius.kvs.internal.ttl.TTLEntity
 import com.santimattius.kvs.internal.ttl.TtlManager
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -26,8 +27,10 @@ internal class TtlCleanupJob(
             while (isActive) {
                 try {
                     cleanupExpiredKeys()
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (_: Exception) {
-                    // continue running on error
+                    // continue running on operational error
                 }
                 delay(interval)
             }

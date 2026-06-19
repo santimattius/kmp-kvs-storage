@@ -1,4 +1,4 @@
-package com.santimattius.kvs.internal.ttl
+package com.santimattius.kvs.ttl
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job

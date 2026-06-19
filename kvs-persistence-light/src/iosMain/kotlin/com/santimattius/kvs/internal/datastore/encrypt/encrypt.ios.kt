@@ -1,5 +1,6 @@
 package com.santimattius.kvs.internal.datastore.encrypt
 
+import com.santimattius.kvs.Encryptor
 import com.santimattius.kvs.internal.extensions.base64ToByteArray
 import com.santimattius.kvs.internal.extensions.byteArrayToBase64
 import com.santimattius.kvs.internal.logger.KvsLogger

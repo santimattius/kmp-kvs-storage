@@ -1,7 +1,7 @@
 package com.santimattius.kvs.internal.document
 
 import androidx.datastore.core.DataStore
-import com.santimattius.kvs.internal.datastore.encrypt.Encryptor
+import com.santimattius.kvs.Encryptor
 import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.InternalCoroutinesApi

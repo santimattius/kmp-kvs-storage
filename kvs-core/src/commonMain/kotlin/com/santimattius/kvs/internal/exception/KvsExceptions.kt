@@ -1,15 +1,9 @@
 package com.santimattius.kvs.internal.exception
 
-abstract class KvsException(message: String, cause: Throwable? = null) : Throwable(message, cause)
+import com.santimattius.kvs.KvsException
 
-class ReadKvsException(message: String, cause: Throwable? = null) : KvsException(message, cause)
+internal class RemoveKvsException(message: String) : KvsException(message)
 
-class WriteKvsException(message: String, cause: Throwable? = null) : KvsException(message, cause)
+internal class ClearKvsException(message: String) : KvsException(message)
 
-class RemoveKvsException(message: String) : KvsException(message)
-
-class ClearKvsException(message: String) : KvsException(message)
-
-class ContainsKvsException(message: String) : KvsException(message)
-
-class GetAllKvsException(message: String) : KvsException(message)
+internal class ContainsKvsException(message: String) : KvsException(message)

@@ -4,13 +4,13 @@ package com.santimattius.kvs
 
 import com.santimattius.kvs.internal.DataStoreKvs
 import com.santimattius.kvs.internal.datastore.encrypt.DsEncryptStorage
-import com.santimattius.kvs.internal.datastore.encrypt.Encryptor
+import com.santimattius.kvs.Encryptor
 import com.santimattius.kvs.internal.datastore.encrypt.encryptor
 import com.santimattius.kvs.internal.datastore.storage.DsStorage
 import com.santimattius.kvs.internal.logger.NoopKvsLogger
 import com.santimattius.kvs.internal.logger.logger
 import com.santimattius.kvs.internal.provideDataStoreInstance
-import com.santimattius.kvs.internal.ttl.Ttl
+import com.santimattius.kvs.ttl.Ttl
 import com.santimattius.kvs.internal.ttl.TtlManager
 import com.santimattius.kvs.internal.ttl.extended.TtlKvsExtended
 import com.santimattius.kvs.internal.ttl.provideTtlDataStoreInstance
