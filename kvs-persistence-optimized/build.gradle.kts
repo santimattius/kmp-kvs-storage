@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.androidKMPLibrary)
     alias(libs.plugins.mavenPublish)
     alias(libs.plugins.sqldelight)
+    id("org.jetbrains.dokka")
 }
 
 group = "io.github.santimattius"
@@ -72,6 +73,12 @@ sqldelight {
         }
     }
     linkSqlite.set(true)
+}
+
+dokka {
+    dokkaSourceSets.named("commonMain") {
+        // KMP common symbols render once here, tagged with available platforms.
+    }
 }
 
 mavenPublishing {

@@ -1,6 +1,7 @@
 plugins {
     `java-platform`
     alias(libs.plugins.mavenPublish)
+    id("org.jetbrains.dokka")
 }
 
 group = "io.github.santimattius"
