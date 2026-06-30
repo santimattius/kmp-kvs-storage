@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidKMPLibrary)
     alias(libs.plugins.mavenPublish)
+    id("org.jetbrains.dokka")
 }
 
 group = "io.github.santimattius"
@@ -46,6 +47,12 @@ kotlin {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
         }
+    }
+}
+
+dokka {
+    dokkaSourceSets.named("commonMain") {
+        // KMP common symbols render once here, tagged with available platforms.
     }
 }
 

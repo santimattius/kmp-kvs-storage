@@ -6,6 +6,7 @@ kotlinxCollectionsImmutable = "0.5.0"
 skie = "0.10.12"
 swiftklib = "0.6.4"
 mavenPublish = "0.36.0"
+dokka = "2.1.0"
 
 android-compileSdk = "37"
 android-minSdk = "24"
@@ -95,3 +96,4 @@ skie = { id = "co.touchlab.skie", version.ref = "skie" }
 swiftklib = { id = "io.github.ttypic.swiftklib", version.ref = "swiftklib" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
