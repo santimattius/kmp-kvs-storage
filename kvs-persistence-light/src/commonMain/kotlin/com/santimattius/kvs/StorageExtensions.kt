@@ -1,4 +1,5 @@
 @file:OptIn(ExperimentalKvsTtl::class)
+@file:kotlin.jvm.JvmName("LightStorageExtensions")
 
 package com.santimattius.kvs
 
