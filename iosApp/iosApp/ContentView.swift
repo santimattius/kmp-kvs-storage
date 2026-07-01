@@ -2,38 +2,47 @@ import SwiftUI
 import KvsStorage
 
 struct ContentView: View {
-    private let kvs = Storage.shared.encryptKvs(name: "user_preferences", key: "secret")
-    
+    private let kvs = Storage.shared.kvsLightEncrypt(name: "user_preferences", secretKey: "secret")
+
     private let document = Storage.shared.document(name: "profile")
-    
+
     @State private var isDarkModeEnabled = false
-    
+
     var body: some View {
-        VStack {
-            VStack(spacing: 16) {
-                Image(systemName: "swift")
-                    .font(.system(size: 80))
-                    .foregroundColor(.accentColor)
-                Text("Kvs Storage")
+        NavigationStack {
+            VStack {
+                VStack(spacing: 16) {
+                    Image(systemName: "swift")
+                        .font(.system(size: 80))
+                        .foregroundColor(.accentColor)
+                    Text("Kvs Storage")
+                }
+                Toggle(isOn: $isDarkModeEnabled) {
+                    Text("Is Dark Mode Enabled")
+                }.onChange(of: isDarkModeEnabled){
+                    updateValue(value: isDarkModeEnabled)
+                }
+                Button("Update Document") {
+                    updateDocument()
+                }
+
+                NavigationLink("Storage Demos") {
+                    DemoListView()
+                }
             }
-            Toggle(isOn: $isDarkModeEnabled) {
-                 Text("Is Dark Mode Enabled")
-            }.onChange(of: isDarkModeEnabled){
-                updateValue(value: isDarkModeEnabled)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .padding()
+            .background(isDarkModeEnabled ? Color.black: Color.white)
+            .environment(\.colorScheme, isDarkModeEnabled ? .dark : .light)
+            .task {
+                for await isEnabled in kvs.getBooleanAsStream( key: "is_dark_mode_enabled", defValue: false) {
+                    self.isDarkModeEnabled = isEnabled.boolValue
+                }
+                /*self.isDarkModeEnabled = try! await kvs.getBoolean(
+                    key: "is_dark_mode_enabled", defValue: false
+                ).boolValue
+                 */
             }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .padding()
-        .background(isDarkModeEnabled ? Color.black: Color.white)
-        .environment(\.colorScheme, isDarkModeEnabled ? .dark : .light)
-        .task {
-            for await isEnabled in kvs.getBooleanAsStream( key: "is_dark_mode_enabled", defValue: false) {
-                self.isDarkModeEnabled = isEnabled.boolValue
-            }
-            /*self.isDarkModeEnabled = try! await kvs.getBoolean(
-                key: "is_dark_mode_enabled", defValue: false
-            ).boolValue
-             */
         }
     }
     
