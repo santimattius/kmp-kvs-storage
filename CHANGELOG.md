@@ -4,14 +4,7 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
-### Breaking changes
-
-- `KvsStandard`, `KvsStream`, and `TtlManager` are now annotated with `@InternalKvsApi`. They are cross-module implementation details and are not part of the public API. Any direct usage now requires `@OptIn(InternalKvsApi::class)` and should be considered unsupported.
-- `lightPersistencePath()` and `lightEncryptor()` in `kvs-persistence-light` are now annotated with `@InternalKvsApi`. These functions are bridges between library modules only and were never intended for external consumers. If you called them directly, migrate to the public `Storage.document()` and `Storage.encryptDocument()` APIs, or open an issue.
-- `AppContextInitializer` moved from `com.santimattius.kvs.internal.context` to `com.santimattius.kvs.android`. If you reference this class directly in your own manifest (non-standard use), update the `android:name` attribute.
-- `OptimizedKvsInitializer` moved from `com.santimattius.kvs.internal` to `com.santimattius.kvs.android`. Same note applies.
-
-## [2.0.0] — 2026-06-07
+Consolidates the 2.0.0 module split, API visibility hardening, and library quality improvements. No `2.0.0` artifact has been published yet — this entire section ships together as `2.0.0` on first release.
 
 ### Breaking changes
 
@@ -43,6 +36,28 @@ All notable changes to this project are documented in this file.
 Deprecated aliases (`simpleKvs`, `optimizedKvs`, `kvs(name)` without TTL) remain for migration but will be removed in a future release.
 
 **Backend selection.** When both light and optimized backends are on the classpath, call `kvsLight` or `kvsOptimized` explicitly — there is no automatic resolution.
+
+**API visibility hardening.**
+
+- `KvsStandard`, `KvsStream`, and `TtlManager` are now annotated with `@InternalKvsApi`. They are cross-module implementation details and are not part of the public API. Any direct usage now requires `@OptIn(InternalKvsApi::class)` and should be considered unsupported.
+- `lightPersistencePath()` and `lightEncryptor()` in `kvs-persistence-light` are now annotated with `@InternalKvsApi`. These functions are bridges between library modules only and were never intended for external consumers. If you called them directly, migrate to the public `Storage.document()` and `Storage.encryptDocument()` APIs, or open an issue.
+- `AppContextInitializer` moved from `com.santimattius.kvs.internal.context` to `com.santimattius.kvs.android`. If you reference this class directly in your own manifest (non-standard use), update the `android:name` attribute.
+- `OptimizedKvsInitializer` moved from `com.santimattius.kvs.internal` to `com.santimattius.kvs.android`. Same note applies.
+
+### Fixed
+
+- `TtlCleanupJob` and `TtlBatchCleanupJob` no longer swallow `CancellationException` in their cleanup loops. Cancelling the parent scope now propagates correctly instead of being silently absorbed, restoring proper structured-concurrency behavior for TTL cleanup.
+
+### Added
+
+- Full KDoc across the public `commonMain` API surface (`Kvs`, `KvsExtended`, `Storage`, and the internal-but-documented `KvsStandard`/`KvsStream`), plus a unified Dokka multi-module API reference site, published to GitHub Pages on release.
+- Revamped Android and iOS sample apps: dedicated demo screens/views for all 6 `Storage` factories (in-memory, light, light-encrypted, optimized, document, encrypted document), each performing a `put` + `get` with the result shown on screen.
+- New `kvs-benchmarks` module (AndroidX Microbenchmark) with baseline `put`/`get`/`getAll` measurements for every storage backend, including a dedicated TTL hot-path benchmark (scan + expire cost under a mixed live/expired dataset). Dev-tooling only — not published.
+
+### Changed
+
+- Library version is now a single source of truth: `kvsVersion` in `gradle/libs.versions.toml`, referenced by every publishable module. No module hardcodes its version string anymore.
+- `kvs-bom` no longer constrains the legacy `shared` aggregator.
 
 ### Migration
 
