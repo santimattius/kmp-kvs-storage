@@ -3,7 +3,6 @@
 //
 
 import Foundation
-import KvsStorage
 
 public extension Document {
     func get<T: Codable>() async throws -> T {
@@ -20,7 +19,14 @@ public extension Document {
     }
 
     func put<T: Codable>(value: T) async throws {
-        let stringData = try JSONEncoder().encode(value)
-        try await write(value: stringData.asString())
+        let encodedData = try JSONEncoder().encode(value)
+        guard let string = String(data: encodedData, encoding: .utf8) else {
+            throw NSError(
+                domain: "KvsStorage",
+                code: -3,
+                userInfo: [NSLocalizedDescriptionKey: "Failed to convert Data to String"]
+            )
+        }
+        try await write(value: string)
     }
 }
