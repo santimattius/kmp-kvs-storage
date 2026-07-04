@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "io.github.santimattius"
-version = "2.0.0"
+version = libs.versions.kvsVersion.get()
 
 javaPlatform {
     allowDependencies()
@@ -17,7 +17,6 @@ dependencies {
         api(projects.kvsPersistenceLight)
         api(projects.kvsPersistenceOptimized)
         api(projects.kvsDocument)
-        api(projects.shared)
     }
 }
 

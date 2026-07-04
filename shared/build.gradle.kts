@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "io.github.santimattius"
-version = "2.0.0"
+version = libs.versions.kvsVersion.get()
 
 kotlin {
     androidLibrary {
