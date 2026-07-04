@@ -1,4 +1,5 @@
 [versions]
+kvsVersion = "2.0.0"
 agp = "9.1.1"
 kotlin = "2.3.21"
 kotlinStdlib = "2.3.0"
